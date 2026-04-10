@@ -1,0 +1,1074 @@
+{
+  "name": "AI Tool Radar - Collector copy",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8,
+              "triggerAtMinute": 1
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        48,
+        -672
+      ],
+      "id": "9e972738-c934-4373-9147-054b82568286",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://hnrss.org/newest?q=AI",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        320,
+        -624
+      ],
+      "id": "65376fae-6617-49ed-8643-3ba1a2c78b9a",
+      "name": "RSS Read"
+    },
+    {
+      "parameters": {
+        "maxItems": 6
+      },
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        464,
+        -640
+      ],
+      "id": "8b64f51c-61c9-4601-a677-0045554891f4",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "278be125-de39-4b07-ac7a-6057641fb3d2",
+              "name": "title",
+              "value": "={{$json.title}}",
+              "type": "string"
+            },
+            {
+              "id": "9fa4ac30-0bb5-4198-9336-f843f8a3bafd",
+              "name": "source",
+              "value": "HackerNews",
+              "type": "string"
+            },
+            {
+              "id": "cf69e1f4-650e-4078-9588-0d1988046574",
+              "name": "summary",
+              "value": "={{$json.title}}",
+              "type": "string"
+            },
+            {
+              "id": "000ac820-99e5-4be1-94e8-280969ce9bbf",
+              "name": "url",
+              "value": "={{$json.link}}",
+              "type": "string"
+            },
+            {
+              "id": "e3b93ecc-e4b0-443e-a9f8-ed4600beb69d",
+              "name": "published_date",
+              "value": "={{$json.pubDate}}",
+              "type": "string"
+            },
+            {
+              "id": "1254c9a9-8654-4f08-b3d0-8331c7154e2d",
+              "name": "created_at",
+              "value": "={{$now}}",
+              "type": "string"
+            },
+            {
+              "id": "7d43b0ec-098d-493c-b0c2-9ac540b5f6ea",
+              "name": "status",
+              "value": "New",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        624,
+        -640
+      ],
+      "id": "ccfafcd5-3e5c-4bd0-b22b-ea5011e5ed6a",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "10QoSbMU2Rdv7hNRD_iSCdce33uHiA6JsUS87m780Jvw",
+          "mode": "list",
+          "cachedResultName": "AI Tool Radar",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/10QoSbMU2Rdv7hNRD_iSCdce33uHiA6JsUS87m780Jvw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/10QoSbMU2Rdv7hNRD_iSCdce33uHiA6JsUS87m780Jvw/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "title": "={{$json.title}}",
+            "source": "={{$json.source}}",
+            "summary": "={{$json.summary}}",
+            "category": "={{$json.category}}",
+            "lab_relevance": "={{$json.lab_relevance}}",
+            "practicality": "={{$json.practicality}}",
+            "novelty": "={{$json.novelty}}",
+            "final_score": "={{$json.final_score}}",
+            "recommended_action": "={{$json.recommended_action}}",
+            "why_it_matters": "={{$json.why_it_matters}}",
+            "status": "={{$json.status}}",
+            "created_at": "={{$json.created_at}}",
+            "hash_id": "={{$json.hash_id}}",
+            "url": "={{$json.url}}",
+            "published_date": "={{$json.published_date}}"
+          },
+          "matchingColumns": [
+            "hash_id"
+          ],
+          "schema": [
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "source",
+              "displayName": "source",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "summary",
+              "displayName": "summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "published_date",
+              "displayName": "published_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "category",
+              "displayName": "category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "lab_relevance",
+              "displayName": "lab_relevance",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "practicality",
+              "displayName": "practicality",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "novelty",
+              "displayName": "novelty",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "final_score",
+              "displayName": "final_score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "recommended_action",
+              "displayName": "recommended_action",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "why_it_matters",
+              "displayName": "why_it_matters",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "hash_id",
+              "displayName": "hash_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1760,
+        -352
+      ],
+      "id": "adea95db-29ce-4065-b68a-e873047b94ab",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "8wbckJeo4S8rs7CL",
+          "name": "GoogleSheets-VATSentinel"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "02736089-da81-44f0-b44d-d0148ab7f919",
+              "name": "title",
+              "value": "={{$('Code in JavaScript2').item.json.title}}",
+              "type": "string"
+            },
+            {
+              "id": "4216e743-9cee-4de7-a755-91c4527f2531",
+              "name": "source",
+              "value": "={{$('Code in JavaScript2').item.json.source}}",
+              "type": "string"
+            },
+            {
+              "id": "34e24797-d972-408e-80a5-0ab00317ad34",
+              "name": "summary",
+              "value": "={{$('Code in JavaScript2').item.json.summary}}",
+              "type": "string"
+            },
+            {
+              "id": "9615f259-d743-4622-a490-dad838f16109",
+              "name": "url",
+              "value": "={{$('Code in JavaScript2').item.json.url}}",
+              "type": "string"
+            },
+            {
+              "id": "60bb25d0-fcbf-4134-9bea-0607d825919f",
+              "name": "published_date",
+              "value": "={{$('Code in JavaScript2').item.json.published_date}}",
+              "type": "string"
+            },
+            {
+              "id": "c00efedf-7ded-4b98-a905-e796ac3394ea",
+              "name": "created_at",
+              "value": "={{$('Code in JavaScript2').item.json.created_at}}",
+              "type": "string"
+            },
+            {
+              "id": "7877920f-faad-47e7-9e4b-ca4424f3ec06",
+              "name": "status",
+              "value": "={{$('Code in JavaScript2').item.json.status}}",
+              "type": "string"
+            },
+            {
+              "id": "9b240caf-86e2-4d08-bb82-2d6e93e9869a",
+              "name": "ai_raw",
+              "value": "={{ (($json.choices?.[0]?.message?.content) || '{\"category\":\"unknown\",\"lab_relevance\":0,\"practicality\":0,\"novelty\":0,\"recommended_action\":\"Watch\",\"why_it_matters\":\"Model response missing\"}')\n  .replace(/```json/g, '')\n  .replace(/```/g, '')\n  .replace(/^json\\s*/i, '')\n  .replace(/\\n/g, ' ')\n  .replace(/\\\\\"/g, '\"')\n  .trim() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1472,
+        -368
+      ],
+      "id": "987c41a0-4d34-4d5e-88c4-16870098e28a",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nconst allowedCategories = new Set([\n  \"LLM\", \"Agents\", \"RAG\", \"Evaluation\", \"Multimodal\",\n  \"Coding\", \"Productivity\", \"Research Tools\", \"Automation\"\n]);\n\nconst allowedActions = new Set([\"Test\", \"Watch\", \"Ignore\"]);\n\nconst clampScore = (value) => {\n  const n = Number(value);\n  if (!Number.isFinite(n)) return 0;\n  return Math.max(1, Math.min(10, Math.round(n)));\n};\n\nconst safeText = (value, fallback) => {\n  const text = String(value ?? \"\").trim();\n  return text || fallback;\n};\n\nconst hashText = (text) => {\n  let hash = 5381;\n  for (let i = 0; i < text.length; i++) {\n    hash = ((hash << 5) + hash) + text.charCodeAt(i);\n    hash = hash >>> 0;\n  }\n  return `h_${hash.toString(16)}`;\n};\n\nreturn items.map((item, idx) => {\n  let parsed;\n\n  try {\n    parsed = JSON.parse(item.json.ai_raw || \"{}\");\n  } catch (e) {\n    parsed = {\n      category: \"unknown\",\n      lab_relevance: 0,\n      practicality: 0,\n      novelty: 0,\n      recommended_action: \"Pending\",\n      why_it_matters: \"Parsing failed\"\n    };\n  }\n\n  const rawCategory = safeText(parsed.category, \"unknown\");\n  const category = allowedCategories.has(rawCategory) ? rawCategory : \"unknown\";\n\n  const rawAction = safeText(parsed.recommended_action, \"Pending\");\n  const recommended_action = allowedActions.has(rawAction) ? rawAction : \"Watch\";\n\n  const lab = clampScore(parsed.lab_relevance);\n  const prac = clampScore(parsed.practicality);\n  const nov = clampScore(parsed.novelty);\n\n  const final_score = Number(((lab + prac + nov) / 3).toFixed(2));\n  const why_it_matters = safeText(parsed.why_it_matters, \"Pending\").slice(0, 220);\n\n  const title = safeText(item.json.title, \"untitled\").toLowerCase();\n  const url = safeText(item.json.url, \"\").toLowerCase();\n  const hash_id = hashText(`${title}|${url}`);\n\n  return {\n    json: {\n      id: `${new Date().toISOString()}-${idx}`,\n      ...item.json,\n      hash_id,\n      category,\n      lab_relevance: lab,\n      practicality: prac,\n      novelty: nov,\n      final_score,\n      recommended_action,\n      why_it_matters\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1616,
+        -352
+      ],
+      "id": "8f54df17-632d-4e99-af8b-f216f4e3bcb2",
+      "name": "code"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8,
+              "triggerAtMinute": 1
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        144,
+        -160
+      ],
+      "id": "0cd337d5-e550-4eab-a4c1-e5db98cf3429",
+      "name": "Schedule Trigger1"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "10QoSbMU2Rdv7hNRD_iSCdce33uHiA6JsUS87m780Jvw",
+          "mode": "list",
+          "cachedResultName": "AI Tool Radar",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/10QoSbMU2Rdv7hNRD_iSCdce33uHiA6JsUS87m780Jvw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/10QoSbMU2Rdv7hNRD_iSCdce33uHiA6JsUS87m780Jvw/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        336,
+        -160
+      ],
+      "id": "297fc0d9-be4a-493e-b75f-ba5febd07293",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "8wbckJeo4S8rs7CL",
+          "name": "GoogleSheets-VATSentinel"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const allItems = $input.all().map(item => item.json);\n\nconst now = new Date();\nconst DAYS_30 = 1000 * 60 * 60 * 24 * 30;\n\nfunction isRecent(dateStr) {\n  if (!dateStr) return false;\n  const d = new Date(dateStr);\n  if (isNaN(d.getTime())) return false;\n  return (now - d) <= DAYS_30;\n}\n\nconst filtered = allItems\n  .filter(row => {\n    const score = Number(row.final_score || 0);\n    const action = row.recommended_action || \"\";\n    const why = row.why_it_matters || \"\";\n\n    if (!row.title) return false;\n    if (!row.category) return false;\n    if (!why) return false;\n    if (why === \"Parsing failed\") return false;\n    if (!isRecent(row.published_date)) return false;\n\n    return action === \"Test\" || score >= 6;\n  })\n  .sort((a, b) => Number(b.final_score || 0) - Number(a.final_score || 0))\n  .slice(0, 6);\n\nreturn filtered.map(row => ({\n  json: {\n    ...row,\n    total_scanned: allItems.length,\n    total_selected: filtered.length\n  }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        512,
+        -144
+      ],
+      "id": "3072e554-e995-4ede-95e3-75dc5c851e5b",
+      "name": "filter"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all().map(i => i.json);\n\nconst sorted = items.sort((a, b) => Number(b.final_score || 0) - Number(a.final_score || 0));\nconst topPick = sorted[0] || null;\nconst rest = sorted.slice(1);\n\nconst totalScanned = sorted[0]?.total_scanned || items.length;\nconst totalSelected = sorted[0]?.total_selected || items.length;\n\nconst testItems = rest.filter(x => x.recommended_action === \"Test\");\nconst watchItems = rest.filter(x => x.recommended_action === \"Watch\");\n\nconst actionColor = (action) => {\n  if (action === \"Test\") return \"#16a34a\";\n  if (action === \"Watch\") return \"#d97706\";\n  return \"#6b7280\";\n};\n\nconst actionBg = (action) => {\n  if (action === \"Test\") return \"#dcfce7\";\n  if (action === \"Watch\") return \"#fef3c7\";\n  return \"#f3f4f6\";\n};\n\nconst badgeBg = (score) => {\n  const s = Number(score || 0);\n  if (s >= 7) return \"#dcfce7\";\n  if (s >= 6) return \"#fef3c7\";\n  return \"#f3f4f6\";\n};\n\nconst sourceIcon = (source) => {\n  if (source === \"HackerNews\") return \"🟠\";\n  if (source === \"ProductHunt\") return \"🟣\";\n  if (source === \"GitHub\") return \"⚫\";\n  if (source === \"arXiv\") return \"🔵\";\n  return \"•\";\n};\n\nfunction renderCard(item, indexLabel = \"\") {\n  return `\n    <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"border:1px solid #e5e7eb; border-radius:16px; background:#ffffff; margin-bottom:18px;\">\n      <tr>\n        <td style=\"padding:20px;\">\n          ${indexLabel ? `<div style=\"font-size:12px; color:#6b7280; margin-bottom:8px;\">${indexLabel}</div>` : \"\"}\n          <div style=\"font-size:24px; line-height:1.3; font-weight:800; color:#111827; margin-bottom:12px;\">\n            ${item.title}\n          </div>\n          <div style=\"margin-bottom:14px;\">\n            <span style=\"display:inline-block; background:${badgeBg(item.final_score)}; color:#111827; font-size:12px; font-weight:700; padding:6px 10px; border-radius:999px; margin-right:8px;\">\n              Score: ${item.final_score}\n            </span>\n            <span style=\"display:inline-block; background:#eef2ff; color:#4338ca; font-size:12px; font-weight:700; padding:6px 10px; border-radius:999px; margin-right:8px;\">\n              ${item.category}\n            </span>\n            <span style=\"display:inline-block; background:${actionBg(item.recommended_action)}; color:${actionColor(item.recommended_action)}; font-size:12px; font-weight:700; padding:6px 10px; border-radius:999px; margin-right:8px;\">\n              ${item.recommended_action}\n            </span>\n          </div>\n          <div style=\"font-size:14px; line-height:1.7; color:#374151; margin-bottom:14px;\">\n            <b style=\"color:#111827;\">Why it matters:</b> ${item.why_it_matters}\n          </div>\n          <div style=\"font-size:13px; line-height:1.7; color:#4b5563; margin-bottom:14px;\">\n            <b style=\"color:#111827;\">Source:</b> ${sourceIcon(item.source)} ${item.source}<br>\n            <b style=\"color:#111827;\">Published:</b> ${item.published_date}\n          </div>\n          ${item.url ? `<a href=\"${item.url}\" style=\"display:inline-block; background:#111827; color:#ffffff; text-decoration:none; font-size:14px; font-weight:700; padding:10px 16px; border-radius:10px;\">Open item</a>` : \"\"}\n        </td>\n      </tr>\n    </table>\n  `;\n}\n\nconst testSection = testItems.length\n  ? testItems.map((item, idx) => renderCard(item, `Worth testing #${idx + 1}`)).join(\"\")\n  : `<p style=\"font-size:14px; color:#6b7280;\">No strong Test items this cycle.</p>`;\n\nconst watchSection = watchItems.length\n  ? watchItems.map((item, idx) => renderCard(item, `Worth watching #${idx + 1}`)).join(\"\")\n  : `<p style=\"font-size:14px; color:#6b7280;\">No Watch items this cycle.</p>`;\n\nconst body = `\n<!DOCTYPE html>\n<html>\n  <body style=\"margin:0; padding:0; background:#f3f4f6; font-family:Arial, Helvetica, sans-serif;\">\n    <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#f3f4f6; padding:24px 0;\">\n      <tr>\n        <td align=\"center\">\n          <table role=\"presentation\" width=\"700\" cellpadding=\"0\" cellspacing=\"0\" style=\"max-width:700px; width:700px;\">\n            <tr>\n              <td style=\"padding:0 16px 20px 16px;\">\n                <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:linear-gradient(135deg,#111827,#1f2937); border-radius:20px; overflow:hidden;\">\n                  <tr>\n                    <td style=\"padding:30px 28px 24px 28px;\">\n                      <div style=\"font-size:12px; letter-spacing:1px; text-transform:uppercase; color:#c7d2fe; font-weight:700; margin-bottom:10px;\">\n                        Weekly Lab Radar\n                      </div>\n                      <div style=\"font-size:32px; line-height:1.2; color:#ffffff; font-weight:800; margin-bottom:10px;\">\n                        AI Tool Radar\n                      </div>\n                      <div style=\"font-size:15px; line-height:1.6; color:#d1d5db; margin-bottom:10px;\">\n                        A curated weekly digest of tools, repos, and papers worth reviewing for the lab.\n                      </div>\n                      <div style=\"font-size:13px; color:#e5e7eb; line-height:1.6;\">\n                        🧠 ${totalScanned} items scanned → ${totalSelected} selected → 1 top pick\n                      </div>\n                    </td>\n                  </tr>\n                </table>\n              </td>\n            </tr>\n\n            ${topPick ? `\n            <tr>\n              <td style=\"padding:0 16px 10px 16px;\">\n                <div style=\"font-size:20px; font-weight:800; color:#111827; margin:8px 0 14px 2px;\">\n                  🏆 Top pick of the week\n                </div>\n                ${renderCard(topPick, \"Top pick #1\")}\n              </td>\n            </tr>\n            ` : \"\"}\n\n            <tr><td style=\"padding:0 16px 8px 16px;\"><hr style=\"border:none; border-top:1px solid #e5e7eb; margin:10px 0 20px 0;\"></td></tr>\n\n            <tr>\n              <td style=\"padding:0 16px 10px 16px;\">\n                <div style=\"font-size:20px; font-weight:800; color:#111827; margin:8px 0 14px 2px;\">\n                  Worth testing\n                </div>\n                ${testSection}\n              </td>\n            </tr>\n\n            <tr><td style=\"padding:0 16px 8px 16px;\"><hr style=\"border:none; border-top:1px solid #e5e7eb; margin:10px 0 20px 0;\"></td></tr>\n\n            <tr>\n              <td style=\"padding:0 16px 10px 16px;\">\n                <div style=\"font-size:20px; font-weight:800; color:#111827; margin:8px 0 14px 2px;\">\n                  Worth watching\n                </div>\n                ${watchSection}\n              </td>\n            </tr>\n\n            <tr>\n              <td style=\"padding:8px 16px 22px 16px;\">\n                <div style=\"font-size:12px; color:#6b7280; text-align:center; line-height:1.6;\">\n                  Generated automatically by AI Tool Radar with n8n.\n                </div>\n              </td>\n            </tr>\n\n          </table>\n        </td>\n      </tr>\n    </table>\n  </body>\n</html>\n`;\n\nreturn [\n  {\n    json: {\n      subject: \"AI Tool Radar - Weekly Digest\",\n      body\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        704,
+        -144
+      ],
+      "id": "59b2f821-c482-4da4-bfd0-8439d26bc05d",
+      "name": "Email body"
+    },
+    {
+      "parameters": {
+        "jsCode": "const edges = $json?.data?.posts?.edges || [];\n\nreturn edges.map(edge => {\n  const node = edge?.node || {};\n\n  return {\n    json: {\n      title: node.name || \"\",\n      source: \"ProductHunt\",\n      summary: node.tagline || node.description || \"\",\n      url: node.url || \"\",\n      published_date: node.createdAt || \"\",\n      created_at: new Date().toISOString(),\n      status: \"New\"\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        608,
+        -496
+      ],
+      "id": "146e6cd6-2540-4ad4-b98e-71a2347e5706",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "mode": "append",
+        "numberInputs": 4
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1072,
+        -640
+      ],
+      "id": "93a9096a-5157-4a28-8ace-bbfee1be02a9",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.producthunt.com/v2/api/graphql",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer REPLACE_WITH_PRODUCTHUNT_TOKEN"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"query\": \"query { posts(first: 5) { edges { node { name tagline description url createdAt votesCount topics { edges { node { name } } } } } } }\"\n}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        400,
+        -496
+      ],
+      "id": "58860467-58f2-4bbc-bfe9-3a83a449c4b7",
+      "name": "Product hunt",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer REPLACE_WITH_OPENROUTER_API_KEY"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "HTTP-Referer",
+              "value": "https://n8n.io"
+            },
+            {
+              "name": "X-Title",
+              "value": "AI Tool Radar"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"openai/gpt-4o-mini\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You evaluate whether a newly discovered AI tool, repository, paper, or update is worth trying or tracking in a generative AI lab.\\n\\nReturn only strict JSON with these keys:\\ncategory, lab_relevance, practicality, novelty, recommended_action, why_it_matters.\\n\\nRules:\\n- lab_relevance, practicality, novelty must be integers from 1 to 10\\n- recommended_action must be one of: Test, Watch, Ignore\\n- why_it_matters must be one short sentence\\n\\nIMPORTANT:\\nAlways choose a category from this list only:\\nLLM, Agents, RAG, Evaluation, Multimodal, Coding, Productivity, Research Tools, Automation\\n\\nInterpretation guide:\\n- For papers, practicality may be lower but novelty can be high\\n- For repositories, practicality may be high if implementation looks useful\\n- For products/tools, prioritize usefulness for lab workflows\\n- Ignore items that are not meaningfully related to AI work in a generative AI lab\\n\\nCRITICAL OUTPUT RULES:\\n- Return raw JSON only\\n- Do NOT use markdown\\n- Do NOT wrap in code fences\\n- Do NOT prefix with the word json\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Title: {{$json.title}}\\nSource: {{$json.source}}\\nSummary: {{$json.summary}}\\nURL: {{$json.url}}\"\n    }\n  ]\n}",
+        "options": {
+          "timeout": 45000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1424,
+        -608
+      ],
+      "id": "78c5200a-83ea-4b53-b278-f4e939cb66b6",
+      "name": "Open AI",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "sendTo": "sadia.waseem4487@gmail.com",
+        "subject": "={{$items(\"Email body\")[0].json.subject}}",
+        "message": "={{$json.body}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        896,
+        -144
+      ],
+      "id": "fe6dbe7e-3cc4-43c0-bdc5-84f6302506c7",
+      "name": "Send a message",
+      "webhookId": "8d8e4cb7-abd5-450d-8fe6-bb9611b09d32",
+      "executeOnce": true,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "fo8B1xrRduY8EanE",
+          "name": "Gmail account 9"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://api.github.com/search/repositories?q=artificial+intelligence&sort=stars&order=desc&per_page=5",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/vnd.github+json"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        416,
+        -800
+      ],
+      "id": "7648904e-e914-4dda-873d-4dbf30a64ec4",
+      "name": "GitHub Trending",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const repos = $json.items || [];\n\nreturn repos.map(repo => {\n  return {\n    json: {\n      title: repo.name,\n      source: \"GitHub\",\n      summary: repo.description || \"\",\n      url: repo.html_url,\n      published_date: repo.created_at,\n      created_at: new Date().toISOString(),\n      status: \"New\"\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        624,
+        -800
+      ],
+      "id": "10df24a3-f92a-4623-a350-b6eeeff8f1f7",
+      "name": "Transform GitHub data"
+    },
+    {
+      "parameters": {
+        "url": "https://export.arxiv.org/api/query?search_query=all:artificial+intelligence&start=0&max_results=5",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        320,
+        -336
+      ],
+      "id": "88cc03e3-7979-4254-91b0-77bb5703c8ae",
+      "name": "HTTP Request",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const feed = $json.feed || $json;\nlet entries = feed.entry || [];\n\nif (!Array.isArray(entries)) {\n  entries = [entries];\n}\n\nreturn entries.map(entry => {\n  const title = entry.title?._text || entry.title || \"\";\n  const summary = entry.summary?._text || entry.summary || \"\";\n  const published = entry.published?._text || entry.published || \"\";\n  const url = entry.id?._text || entry.id || \"\";\n\n  return {\n    json: {\n      title: String(title).replace(/\\s+/g, \" \").trim(),\n      source: \"arXiv\",\n      summary: String(summary).replace(/\\s+/g, \" \").trim().slice(0, 500),\n      url: String(url),\n      published_date: String(published),\n      created_at: new Date().toISOString(),\n      status: \"New\"\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        704,
+        -336
+      ],
+      "id": "9cd36784-d4ed-45e6-815a-635f377980dd",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.xml",
+      "typeVersion": 1,
+      "position": [
+        528,
+        -336
+      ],
+      "id": "b90f3bc9-3bdd-47b3-9d4f-4a052e74eb77",
+      "name": "XML"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nconst keywords = [\n  \"ai\", \"artificial intelligence\", \"llm\", \"gpt\",\n  \"agent\", \"agents\", \"rag\", \"multimodal\",\n  \"model\", \"models\", \"machine learning\", \"ml\",\n  \"genai\", \"generative\", \"embedding\",\n  \"fine-tuning\", \"inference\", \"vision\", \"voice\"\n];\n\nfunction scoreItem(item) {\n  const title = (item.json.title || \"\").toLowerCase();\n  const summary = (item.json.summary || \"\").toLowerCase();\n  const text = `${title} ${summary}`;\n\n  let score = 0;\n  for (const k of keywords) {\n    if (text.includes(k)) score += 2;\n  }\n\n  const source = item.json.source || \"\";\n  if (source === \"ProductHunt\") score += 3;\n  if (source === \"GitHub\") score += 2;\n  if (source === \"arXiv\") score += 2;\n  if (source === \"HackerNews\") score += 1;\n\n  return score;\n}\n\n// deduplicate by URL\nconst seen = new Set();\nconst deduped = items.filter(item => {\n  const url = item.json.url || \"\";\n  if (!url) return true;\n  if (seen.has(url)) return false;\n  seen.add(url);\n  return true;\n});\n\n// keep only AI-relevant items\nconst relevant = deduped.filter(item => {\n  const title = (item.json.title || \"\").toLowerCase();\n  const summary = (item.json.summary || \"\").toLowerCase();\n  const text = `${title} ${summary}`;\n  return keywords.some(k => text.includes(k));\n});\n\n// group by source\nconst groups = {\n  ProductHunt: [],\n  GitHub: [],\n  arXiv: [],\n  HackerNews: []\n};\n\nfor (const item of relevant) {\n  const source = item.json.source || \"\";\n  if (groups[source]) {\n    groups[source].push({ item, score: scoreItem(item) });\n  }\n}\n\n// sort inside each group\nfor (const source of Object.keys(groups)) {\n  groups[source].sort((a, b) => b.score - a.score);\n}\n\n// new quotas\nconst limits = {\n  ProductHunt: 3,\n  GitHub: 2,\n  arXiv: 2,\n  HackerNews: 1\n};\n\nlet selected = [];\n\nfor (const source of Object.keys(limits)) {\n  selected.push(...groups[source].slice(0, limits[source]).map(x => x.item));\n}\n\n// fill remaining slots up to 8 from leftovers\nif (selected.length < 8) {\n  const selectedUrls = new Set(selected.map(x => x.json.url || \"\"));\n  const leftovers = [];\n\n  for (const source of Object.keys(groups)) {\n    for (const x of groups[source]) {\n      const url = x.item.json.url || \"\";\n      if (!selectedUrls.has(url)) leftovers.push(x);\n    }\n  }\n\n  leftovers.sort((a, b) => b.score - a.score);\n\n  for (const x of leftovers) {\n    if (selected.length >= 8) break;\n    selected.push(x.item);\n  }\n}\n\nreturn selected;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1248,
+        -608
+      ],
+      "id": "a420f7ac-77af-4545-836d-66fd46214ec3",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "path": "ai-tool-radar",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        272,
+        -960
+      ],
+      "id": "a588a520-ebee-46cc-be8a-2d2fc7345c0e",
+      "name": "Webhook",
+      "webhookId": "6711a32d-8806-483f-979a-d5853cb897ee"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "10QoSbMU2Rdv7hNRD_iSCdce33uHiA6JsUS87m780Jvw",
+          "mode": "list",
+          "cachedResultName": "AI Tool Radar",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/10QoSbMU2Rdv7hNRD_iSCdce33uHiA6JsUS87m780Jvw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/10QoSbMU2Rdv7hNRD_iSCdce33uHiA6JsUS87m780Jvw/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        480,
+        -960
+      ],
+      "id": "cc8e2caa-47bf-4483-8b4e-1672f50208ae",
+      "name": "Get row(s) in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "8wbckJeo4S8rs7CL",
+          "name": "GoogleSheets-VATSentinel"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows = $input.all().map(item => item.json);\n\nconst cleaned = rows\n  .filter(row =>\n    row.title &&\n    row.title !== \"title\" &&\n    row.final_score !== \"\" &&\n    row.final_score !== \"final_score\"\n  )\n  .map(row => ({\n    id: row.id || \"\",\n    hash_id: row.hash_id || \"\",\n    title: row.title || \"\",\n    source: row.source || \"\",\n    category: row.category || \"\",\n    published_date: row.published_date || \"\",\n    url: row.url || \"\",\n    summary: row.summary || \"\",\n    lab_relevance: Number(row.lab_relevance || 0),\n    practicality: Number(row.practicality || 0),\n    novelty: Number(row.novelty || 0),\n    final_score: Number(row.final_score || 0),\n    recommended_action: row.recommended_action || \"\",\n    why_it_matters: row.why_it_matters || \"\",\n    status: row.status || \"\",\n    created_at: row.created_at || \"\"\n  }))\n  .sort((a, b) => b.final_score - a.final_score);\n\nconst uniqueByHash = [];\nconst seen = new Set();\nfor (const row of cleaned) {\n  const key = row.hash_id || row.url || row.title;\n  if (!key) continue;\n  if (seen.has(key)) continue;\n  seen.add(key);\n  uniqueByHash.push(row);\n}\n\nconst duplicateRowsRemoved = Math.max(0, cleaned.length - uniqueByHash.length);\n\nconst lastCollectorRun = uniqueByHash.reduce((latest, row) => {\n  const t = new Date(row.created_at || 0).getTime();\n  if (!Number.isFinite(t)) return latest;\n  return t > latest ? t : latest;\n}, 0);\n\nreturn [\n  {\n    json: {\n      meta: {\n        generated_at: new Date().toISOString(),\n        total_rows: cleaned.length,\n        unique_rows: uniqueByHash.length,\n        duplicate_rows_removed: duplicateRowsRemoved,\n        upsert_key: \"hash_id\",\n        last_collector_run: lastCollectorRun ? new Date(lastCollectorRun).toISOString() : \"\"\n      },\n      data: uniqueByHash\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        688,
+        -960
+      ],
+      "id": "31cac1a6-2e7e-4b0e-87f9-07af1319faa1",
+      "name": "code1"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{$json}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        896,
+        -960
+      ],
+      "id": "e763231b-148f-4705-aa28-c819cde2e8b3",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "RSS Read",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Product hunt",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "GitHub Trending",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "code": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "filter": {
+      "main": [
+        [
+          {
+            "node": "Email body",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Product hunt": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Open AI": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email body": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GitHub Trending": {
+      "main": [
+        [
+          {
+            "node": "Transform GitHub data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transform GitHub data": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "XML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "XML": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "Open AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet1": {
+      "main": [
+        [
+          {
+            "node": "code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "code1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "fb689e61-48bb-453b-ba5d-1155b3c800d5",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4784b6630819dc7dc9b11bd92c38955269c9cd3c8cec78f70f71546c7d4973ee"
+  },
+  "id": "IuPFWfrtFoIbG1Yz",
+  "tags": []
+}
