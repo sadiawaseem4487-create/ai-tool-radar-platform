@@ -24,6 +24,8 @@ type RadarApiPayload = {
     generated_at?: string;
     total_rows?: number;
     unique_rows?: number;
+    duplicate_rows_removed?: number;
+    upsert_key?: string;
     last_collector_run?: string;
   };
 };
@@ -72,6 +74,17 @@ function getItemKey(item: RadarItem) {
 function parseDate(value: string) {
   const ms = new Date(value || "").getTime();
   return Number.isNaN(ms) ? 0 : ms;
+}
+
+function timeAgo(value: string) {
+  const ms = parseDate(value);
+  if (!ms) return "unknown time";
+  const diff = Date.now() - ms;
+  const hour = 60 * 60 * 1000;
+  const day = 24 * hour;
+  if (diff < hour) return `${Math.max(1, Math.floor(diff / (60 * 1000)))}m ago`;
+  if (diff < day) return `${Math.floor(diff / hour)}h ago`;
+  return `${Math.floor(diff / day)}d ago`;
 }
 
 export default function Home() {
@@ -336,6 +349,34 @@ export default function Home() {
 
   const health = loading ? "syncing" : error ? "degraded" : "healthy";
 
+  const latestByDate = useMemo(
+    () =>
+      [...filtered].sort(
+        (a, b) => parseDate(b.published_date) - parseDate(a.published_date),
+      ),
+    [filtered],
+  );
+
+  const topStories = useMemo(() => [...filtered].slice(0, 6), [filtered]);
+  const trendingNow = useMemo(
+    () => [...filtered].filter((x) => Number(x.final_score || 0) >= 7).slice(0, 8),
+    [filtered],
+  );
+  const latestTools = useMemo(
+    () =>
+      latestByDate
+        .filter((x) => x.source === "ProductHunt" || x.source === "GitHub")
+        .slice(0, 8),
+    [latestByDate],
+  );
+  const latestResearch = useMemo(
+    () =>
+      latestByDate
+        .filter((x) => x.source === "arXiv" || x.source === "HackerNews")
+        .slice(0, 8),
+    [latestByDate],
+  );
+
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       const target = event.target as HTMLElement | null;
@@ -365,19 +406,23 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900">
-      <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
-        <header className="mb-8 rounded-2xl bg-slate-900 px-6 py-8 text-white">
-          <p className="text-sm uppercase tracking-wide text-slate-300">
-            Weekly Lab Radar
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <header className="mb-6 rounded-2xl bg-slate-900 px-6 py-7 text-white">
+          <p className="text-xs uppercase tracking-[0.2em] text-slate-300">
+            AI NEWS DESK
           </p>
-          <h1 className="mt-2 text-3xl font-bold">AI Tool Radar Dashboard</h1>
-          <p className="mt-2 text-slate-300">
-            Decision board for weekly tool triage.
+          <h1 className="mt-2 text-3xl font-bold">AI Tool Radar - Daily Briefing</h1>
+          <p className="mt-2 text-sm text-slate-300">
+            Latest tools, research articles, and top AI trends in one newsroom-style feed.
           </p>
-          <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-slate-300">
+          <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-300">
             <span>Last sync: {lastUpdated || "not loaded yet"}</span>
-            <span>
-              Last collector run: {apiMeta?.last_collector_run || "unknown"}
+            <span>Collector run: {apiMeta?.last_collector_run || "unknown"}</span>
+            <span className="rounded-full bg-slate-700 px-2 py-0.5">
+              Unique rows: {apiMeta?.unique_rows ?? "-"}
+            </span>
+            <span className="rounded-full bg-slate-700 px-2 py-0.5">
+              Dedup removed: {apiMeta?.duplicate_rows_removed ?? "-"}
             </span>
             <span
               className={`rounded-full px-2 py-0.5 ${
@@ -394,7 +439,7 @@ export default function Home() {
               onClick={loadItems}
               className="rounded-md bg-slate-700 px-2.5 py-1 text-white hover:bg-slate-600"
             >
-              Refresh Data
+              Refresh
             </button>
           </div>
         </header>
@@ -527,55 +572,79 @@ export default function Home() {
           </div>
         </section>
 
-        {top ? (
-          <section className="mb-8 rounded-2xl border border-slate-200 bg-white p-6">
-            <p className="text-sm font-medium text-slate-500">Top Pick</p>
-            <h2 className="mt-2 text-2xl font-semibold">{top.title}</h2>
-            <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
-              <span className={`rounded-full px-3 py-1 ${scoreClass(Number(top.final_score || 0))}`}>
-                Score {top.final_score}
-              </span>
-              <span className="rounded-full bg-indigo-100 px-3 py-1 text-indigo-800">
-                {top.category || "unknown"}
-              </span>
-              <span className={`rounded-full px-3 py-1 ${badgeClass(top.recommended_action)}`}>
-                {top.recommended_action}
-              </span>
-              <span className="text-slate-500">{top.source}</span>
+        <section className="mb-8 grid gap-5 lg:grid-cols-3">
+          <article className="rounded-2xl border border-slate-200 bg-white p-6 lg:col-span-2">
+            <p className="text-xs font-semibold uppercase tracking-wide text-indigo-600">
+              Top Story
+            </p>
+            {top ? (
+              <>
+                <h2 className="mt-2 text-2xl font-bold text-slate-900">{top.title}</h2>
+                <p className="mt-3 text-sm text-slate-600">{top.summary}</p>
+                <p className="mt-2 text-sm text-slate-700">{top.why_it_matters}</p>
+                <div className="mt-4 flex flex-wrap items-center gap-2 text-xs">
+                  <span className={`rounded-full px-2 py-1 ${scoreClass(Number(top.final_score || 0))}`}>
+                    Score {top.final_score}
+                  </span>
+                  <span className="rounded-full bg-indigo-100 px-2 py-1 text-indigo-800">
+                    {top.category || "unknown"}
+                  </span>
+                  <span className={`rounded-full px-2 py-1 ${badgeClass(top.recommended_action)}`}>
+                    {top.recommended_action}
+                  </span>
+                  <span className="text-slate-500">{top.source}</span>
+                  <span className="text-slate-400">{timeAgo(top.published_date)}</span>
+                </div>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {top.url ? (
+                    <a
+                      href={top.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700"
+                    >
+                      Read Story
+                    </a>
+                  ) : null}
+                  <button
+                    onClick={() => setTriage(top, "testing")}
+                    className="rounded-md bg-green-600 px-3 py-1.5 text-xs font-medium text-white"
+                  >
+                    Move to Testing
+                  </button>
+                  <button
+                    onClick={() => setTriage(top, "watch")}
+                    className="rounded-md bg-amber-600 px-3 py-1.5 text-xs font-medium text-white"
+                  >
+                    Move to Watch
+                  </button>
+                </div>
+              </>
+            ) : (
+              <p className="text-sm text-slate-500">No top story available.</p>
+            )}
+          </article>
+
+          <aside className="rounded-2xl border border-slate-200 bg-white p-5">
+            <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-600">
+              Trending Now
+            </h3>
+            <div className="mt-3 space-y-3">
+              {trendingNow.slice(0, 6).map((item) => (
+                <div key={getItemKey(item)} className="border-b border-slate-100 pb-3 last:border-b-0">
+                  <p className="text-sm font-medium leading-snug text-slate-900">{item.title}</p>
+                  <div className="mt-1 flex items-center gap-2 text-xs text-slate-500">
+                    <span className={`rounded-full px-2 py-0.5 ${scoreClass(Number(item.final_score || 0))}`}>
+                      {item.final_score}
+                    </span>
+                    <span>{item.source}</span>
+                    <span>{timeAgo(item.published_date)}</span>
+                  </div>
+                </div>
+              ))}
             </div>
-            <p className="mt-4 text-slate-700">{top.why_it_matters}</p>
-            {top.url ? (
-              <a
-                href={top.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-4 inline-block rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700"
-              >
-                Open Source
-              </a>
-            ) : null}
-            <div className="mt-4 flex flex-wrap gap-2">
-              <button
-                onClick={() => setTriage(top, "testing")}
-                className="rounded-md bg-green-600 px-3 py-1.5 text-xs font-medium text-white"
-              >
-                Move to Testing
-              </button>
-              <button
-                onClick={() => setTriage(top, "watch")}
-                className="rounded-md bg-amber-600 px-3 py-1.5 text-xs font-medium text-white"
-              >
-                Move to Watch
-              </button>
-              <button
-                onClick={() => setTriage(top, "adopted")}
-                className="rounded-md bg-blue-600 px-3 py-1.5 text-xs font-medium text-white"
-              >
-                Mark Adopted
-              </button>
-            </div>
-          </section>
-        ) : null}
+          </aside>
+        </section>
 
         <section className="mb-8 grid gap-4 lg:grid-cols-3">
           <div className="rounded-2xl border border-slate-200 bg-white p-4">
@@ -589,6 +658,82 @@ export default function Home() {
           <div className="rounded-2xl border border-slate-200 bg-white p-4">
             <h3 className="text-sm font-semibold">Watchlist</h3>
             <p className="mt-1 text-2xl font-semibold">{watchItems.length}</p>
+          </div>
+        </section>
+
+        <section className="mb-8 grid gap-5 lg:grid-cols-2">
+          <div className="rounded-2xl border border-slate-200 bg-white p-5">
+            <h3 className="text-lg font-semibold">Latest Tools</h3>
+            <p className="mb-3 text-xs text-slate-500">Product launches and repositories</p>
+            <div className="space-y-3">
+              {latestTools.map((item) => (
+                <article key={getItemKey(item)} className="rounded-lg border border-slate-100 p-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <h4 className="text-sm font-medium text-slate-900">{item.title}</h4>
+                    <span className={`rounded-full px-2 py-0.5 text-xs ${scoreClass(Number(item.final_score || 0))}`}>
+                      {item.final_score}
+                    </span>
+                  </div>
+                  <p className="mt-1 line-clamp-2 text-xs text-slate-600">{item.summary}</p>
+                  <div className="mt-2 flex items-center gap-2 text-xs text-slate-500">
+                    <span>{item.source}</span>
+                    <span>{timeAgo(item.published_date)}</span>
+                    <span className={`rounded-full px-2 py-0.5 ${badgeClass(item.recommended_action)}`}>
+                      {item.recommended_action}
+                    </span>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+          <div className="rounded-2xl border border-slate-200 bg-white p-5">
+            <h3 className="text-lg font-semibold">Latest Articles & Research</h3>
+            <p className="mb-3 text-xs text-slate-500">HN + arXiv highlights for daily scan</p>
+            <div className="space-y-3">
+              {latestResearch.map((item) => (
+                <article key={getItemKey(item)} className="rounded-lg border border-slate-100 p-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <h4 className="text-sm font-medium text-slate-900">{item.title}</h4>
+                    <span className={`rounded-full px-2 py-0.5 text-xs ${scoreClass(Number(item.final_score || 0))}`}>
+                      {item.final_score}
+                    </span>
+                  </div>
+                  <p className="mt-1 line-clamp-2 text-xs text-slate-600">{item.summary}</p>
+                  <div className="mt-2 flex items-center gap-2 text-xs text-slate-500">
+                    <span>{item.source}</span>
+                    <span>{timeAgo(item.published_date)}</span>
+                    <span className={`rounded-full px-2 py-0.5 ${badgeClass(item.recommended_action)}`}>
+                      {item.recommended_action}
+                    </span>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="mb-8 rounded-2xl border border-slate-200 bg-white p-5">
+          <h3 className="text-lg font-semibold">Top Headlines</h3>
+          <p className="mb-3 text-xs text-slate-500">Editorial-style summary of highest ranked signals</p>
+          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+            {topStories.map((item) => (
+              <a
+                key={getItemKey(item)}
+                href={item.url || "#"}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-lg border border-slate-100 p-3 transition hover:border-slate-300"
+              >
+                <p className="text-sm font-medium text-slate-900">{item.title}</p>
+                <div className="mt-2 flex items-center gap-2 text-xs text-slate-500">
+                  <span>{item.source}</span>
+                  <span>{timeAgo(item.published_date)}</span>
+                  <span className={`rounded-full px-2 py-0.5 ${scoreClass(Number(item.final_score || 0))}`}>
+                    {item.final_score}
+                  </span>
+                </div>
+              </a>
+            ))}
           </div>
         </section>
 
