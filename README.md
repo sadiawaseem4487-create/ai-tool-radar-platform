@@ -76,3 +76,7 @@ npm run build
 - Add n8n error-trigger alert workflow (email/Slack)
 - Move API tokens to secrets/credentials (no manual header pasting)
 - Add write-back endpoint for frontend triage status updates
+
+## Operations
+
+- Release checklist: `RELEASE_CHECKLIST.md`
