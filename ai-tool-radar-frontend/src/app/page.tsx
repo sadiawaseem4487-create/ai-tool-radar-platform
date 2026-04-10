@@ -404,76 +404,191 @@ export default function Home() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
 
+  const editionDate = new Date().toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900">
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <header className="mb-6 rounded-2xl bg-slate-900 px-6 py-7 text-white">
-          <p className="text-xs uppercase tracking-[0.2em] text-slate-300">
-            AI NEWS DESK
-          </p>
-          <h1 className="mt-2 text-3xl font-bold">AI Tool Radar - Daily Briefing</h1>
-          <p className="mt-2 text-sm text-slate-300">
-            Latest tools, research articles, and top AI trends in one newsroom-style feed.
-          </p>
-          <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-300">
-            <span>Last sync: {lastUpdated || "not loaded yet"}</span>
-            <span>Collector run: {apiMeta?.last_collector_run || "unknown"}</span>
-            <span className="rounded-full bg-slate-700 px-2 py-0.5">
-              Unique rows: {apiMeta?.unique_rows ?? "-"}
-            </span>
-            <span className="rounded-full bg-slate-700 px-2 py-0.5">
-              Dedup removed: {apiMeta?.duplicate_rows_removed ?? "-"}
-            </span>
+    <main className="min-h-screen bg-[var(--paper)] text-[var(--ink)]">
+      {/* Utility rail */}
+      <div className="border-b border-stone-300 bg-stone-900 text-[11px] text-stone-300">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-4 py-2 sm:px-6">
+          <span className="uppercase tracking-widest text-stone-400">Edition</span>
+          <span className="text-stone-100">{editionDate}</span>
+          <span className="hidden sm:inline">·</span>
+          <span>Updated {lastUpdated || "—"}</span>
+          <span className="hidden md:inline">·</span>
+          <span>
+            Feed status:{" "}
             <span
-              className={`rounded-full px-2 py-0.5 ${
+              className={
                 health === "healthy"
-                  ? "bg-green-700 text-green-100"
+                  ? "text-emerald-400"
                   : health === "degraded"
-                    ? "bg-red-700 text-red-100"
-                    : "bg-amber-700 text-amber-100"
-              }`}
+                    ? "text-red-400"
+                    : "text-amber-300"
+              }
             >
-              Webhook: {health}
+              {health}
             </span>
+          </span>
+          <button
+            type="button"
+            onClick={loadItems}
+            className="ml-auto rounded border border-stone-600 bg-stone-800 px-2 py-0.5 text-stone-100 hover:bg-stone-700"
+          >
+            Refresh edition
+          </button>
+        </div>
+      </div>
+
+      {/* Masthead */}
+      <header className="border-b border-stone-300 bg-[var(--paper-card)]">
+        <div className="mx-auto max-w-6xl px-4 pt-8 pb-6 text-center sm:px-6">
+          <div className="rule-thick mx-auto mb-4 max-w-md" />
+          <p className="text-[10px] font-semibold uppercase tracking-[0.35em] text-stone-500">
+            Artificial intelligence · tools · research · signals
+          </p>
+          <h1 className="font-headline mt-3 text-4xl font-bold tracking-tight text-stone-900 sm:text-5xl">
+            AI Tool Radar
+          </h1>
+          <p className="mx-auto mt-2 max-w-2xl text-sm leading-relaxed text-stone-600">
+            A daily news desk for the latest AI tools, papers, and trending stories — curated and scored for your lab.
+          </p>
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-stone-500">
+            <span>Collector: {apiMeta?.last_collector_run ? new Date(apiMeta.last_collector_run).toLocaleString() : "—"}</span>
+            <span>·</span>
+            <span>Stories: {apiMeta?.unique_rows ?? filtered.length}</span>
+            {apiMeta?.duplicate_rows_removed != null ? (
+              <>
+                <span>·</span>
+                <span>Dedup: {apiMeta.duplicate_rows_removed}</span>
+              </>
+            ) : null}
+          </div>
+        </div>
+
+        {/* Section nav — newspaper-style */}
+        <nav className="border-t border-stone-200 bg-stone-100/80">
+          <div className="mx-auto flex max-w-6xl flex-wrap justify-center gap-1 px-2 py-2 text-xs font-semibold uppercase tracking-wide text-stone-700 sm:gap-4 sm:text-sm">
+            <span className="px-2 py-1 text-stone-500">Sections</span>
             <button
-              onClick={loadItems}
-              className="rounded-md bg-slate-700 px-2.5 py-1 text-white hover:bg-slate-600"
+              type="button"
+              onClick={() => {
+                resetFilters();
+                setSource("all");
+                setCategory("all");
+              }}
+              className="rounded px-2 py-1 hover:bg-white hover:shadow-sm"
             >
-              Refresh
+              Front page
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setSource("ProductHunt");
+                setCategory("all");
+              }}
+              className="rounded px-2 py-1 hover:bg-white hover:shadow-sm"
+            >
+              Product Hunt
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setSource("GitHub");
+                setCategory("all");
+              }}
+              className="rounded px-2 py-1 hover:bg-white hover:shadow-sm"
+            >
+              GitHub
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setSource("arXiv");
+                setCategory("all");
+              }}
+              className="rounded px-2 py-1 hover:bg-white hover:shadow-sm"
+            >
+              Research
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setSource("HackerNews");
+                setCategory("all");
+              }}
+              className="rounded px-2 py-1 hover:bg-white hover:shadow-sm"
+            >
+              News & links
             </button>
           </div>
-        </header>
+        </nav>
+      </header>
 
-        <section className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-xl border border-slate-200 bg-white p-4">
-            <p className="text-sm text-slate-500">Filtered Items</p>
-            <p className="mt-1 text-2xl font-semibold">{filtered.length}</p>
+      {/* Headline ticker */}
+      {filtered.length > 0 ? (
+        <div className="border-b border-red-200 bg-[var(--accent-soft)]">
+          <div className="mx-auto flex max-w-6xl items-center gap-3 overflow-x-auto px-4 py-2 text-xs sm:px-6">
+            <span className="shrink-0 font-bold uppercase tracking-wide text-[var(--accent)]">
+              Wire
+            </span>
+            <div className="flex min-w-0 flex-1 flex-wrap gap-x-6 gap-y-1 text-stone-800">
+              {latestByDate.slice(0, 5).map((item) => (
+                <a
+                  key={getItemKey(item)}
+                  href={item.url || "#"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="truncate hover:underline"
+                >
+                  {item.title}
+                </a>
+              ))}
+            </div>
           </div>
-          <div className="rounded-xl border border-slate-200 bg-white p-4">
-            <p className="text-sm text-slate-500">Avg Score</p>
-            <p className="mt-1 text-2xl font-semibold">{avgScore}</p>
+        </div>
+      ) : null}
+
+      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+        {/* Dateline stats */}
+        <section className="mb-8 grid gap-px overflow-hidden rounded-sm border border-stone-300 bg-stone-300 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="bg-[var(--paper-card)] p-4">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-stone-500">In this edition</p>
+            <p className="font-headline mt-1 text-3xl font-bold text-stone-900">{filtered.length}</p>
           </div>
-          <div className="rounded-xl border border-slate-200 bg-white p-4">
-            <p className="text-sm text-slate-500">Testing Queue</p>
-            <p className="mt-1 text-2xl font-semibold">{testingItems.length}</p>
+          <div className="bg-[var(--paper-card)] p-4">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-stone-500">Avg signal</p>
+            <p className="font-headline mt-1 text-3xl font-bold text-stone-900">{avgScore}</p>
           </div>
-          <div className="rounded-xl border border-slate-200 bg-white p-4">
-            <p className="text-sm text-slate-500">Watch Queue</p>
-            <p className="mt-1 text-2xl font-semibold">{watchItems.length}</p>
+          <div className="bg-[var(--paper-card)] p-4">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-stone-500">To test</p>
+            <p className="font-headline mt-1 text-3xl font-bold text-stone-900">{testingItems.length}</p>
+          </div>
+          <div className="bg-[var(--paper-card)] p-4">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-stone-500">To watch</p>
+            <p className="font-headline mt-1 text-3xl font-bold text-stone-900">{watchItems.length}</p>
           </div>
         </section>
 
-        <section className="mb-8 rounded-2xl border border-slate-200 bg-white p-4">
+        <section className="mb-8 border border-stone-300 bg-[var(--paper-card)] p-4 shadow-sm">
+          <p className="mb-3 text-[10px] font-bold uppercase tracking-wider text-stone-500">
+            Newsroom search & filters
+          </p>
           <div className="grid gap-3 md:grid-cols-6">
             <input
               ref={searchRef}
-              className="rounded-lg border border-slate-300 px-3 py-2 text-sm md:col-span-2"
-              placeholder="Search title, summary, why..."
+              className="rounded-sm border border-stone-300 bg-stone-50 px-3 py-2 text-sm md:col-span-2"
+              placeholder="Search headlines, summaries…"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
             <select
-              className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              className="rounded-sm border border-stone-300 bg-white px-3 py-2 text-sm"
               value={source}
               onChange={(e) => setSource(e.target.value)}
             >
@@ -484,7 +599,7 @@ export default function Home() {
               ))}
             </select>
             <select
-              className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              className="rounded-sm border border-stone-300 bg-white px-3 py-2 text-sm"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
             >
@@ -495,7 +610,7 @@ export default function Home() {
               ))}
             </select>
             <select
-              className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              className="rounded-sm border border-stone-300 bg-white px-3 py-2 text-sm"
               value={action}
               onChange={(e) => setAction(e.target.value)}
             >
@@ -505,7 +620,7 @@ export default function Home() {
               <option value="Ignore">Action: Ignore</option>
             </select>
             <select
-              className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              className="rounded-sm border border-stone-300 bg-white px-3 py-2 text-sm"
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
             >
@@ -513,7 +628,7 @@ export default function Home() {
               <option value="latest">Sort: latest</option>
             </select>
             <select
-              className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              className="rounded-sm border border-stone-300 bg-white px-3 py-2 text-sm"
               value={dateRange}
               onChange={(e) => setDateRange(e.target.value)}
             >
@@ -522,8 +637,8 @@ export default function Home() {
               <option value="30d">Date: 30 days</option>
             </select>
           </div>
-          <div className="mt-3 flex items-center gap-2 text-sm">
-            <label htmlFor="min-score" className="text-slate-600">
+          <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-stone-200 pt-4 text-sm">
+            <label htmlFor="min-score" className="text-stone-600">
               Min score: {minScore}
             </label>
             <input
@@ -534,107 +649,123 @@ export default function Home() {
               step={1}
               value={minScore}
               onChange={(e) => setMinScore(Number(e.target.value))}
+              className="accent-[var(--accent)]"
             />
             <button
               onClick={downloadCsv}
               disabled={filtered.length === 0}
-              className="ml-2 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700"
+              className="rounded-sm border border-stone-400 bg-white px-3 py-1.5 text-xs font-medium text-stone-800 hover:bg-stone-50 disabled:opacity-40"
             >
               Export CSV
             </button>
             <button
               onClick={() => setViewMode("table")}
-              className={`rounded-md px-3 py-1.5 text-xs font-medium ${
-                viewMode === "table" ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-700"
+              className={`rounded-sm border px-3 py-1.5 text-xs font-medium ${
+                viewMode === "table"
+                  ? "border-stone-900 bg-stone-900 text-white"
+                  : "border-stone-300 bg-stone-100 text-stone-700"
               }`}
             >
               Table
             </button>
             <button
               onClick={() => setViewMode("cards")}
-              className={`rounded-md px-3 py-1.5 text-xs font-medium ${
-                viewMode === "cards" ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-700"
+              className={`rounded-sm border px-3 py-1.5 text-xs font-medium ${
+                viewMode === "cards"
+                  ? "border-stone-900 bg-stone-900 text-white"
+                  : "border-stone-300 bg-stone-100 text-stone-700"
               }`}
             >
               Cards
             </button>
-            <label className="ml-2 inline-flex items-center gap-2 text-xs text-slate-700">
+            <label className="inline-flex items-center gap-2 text-xs text-stone-700">
               <input
                 type="checkbox"
                 checked={onlyNewSinceVisit}
                 onChange={(e) => setOnlyNewSinceVisit(e.target.checked)}
+                className="accent-[var(--accent)]"
               />
               Only new since last visit
             </label>
-            <span className="text-xs text-slate-500">
-              Shortcuts: `/` search, `n` toggle new, `t` Test, `w` Watch
+            <span className="text-xs text-stone-500">
+              Shortcuts: `/` search · `n` new · `t` Test · `w` Watch
             </span>
           </div>
         </section>
 
-        <section className="mb-8 grid gap-5 lg:grid-cols-3">
-          <article className="rounded-2xl border border-slate-200 bg-white p-6 lg:col-span-2">
-            <p className="text-xs font-semibold uppercase tracking-wide text-indigo-600">
-              Top Story
+        <section className="mb-8 grid gap-px overflow-hidden border border-stone-300 bg-stone-300 lg:grid-cols-3">
+          <article className="rule-thick relative bg-[var(--paper-card)] p-6 lg:col-span-2">
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--accent)]">
+              Lead story
             </p>
             {top ? (
               <>
-                <h2 className="mt-2 text-2xl font-bold text-slate-900">{top.title}</h2>
-                <p className="mt-3 text-sm text-slate-600">{top.summary}</p>
-                <p className="mt-2 text-sm text-slate-700">{top.why_it_matters}</p>
+                <h2 className="font-headline mt-3 text-3xl font-bold leading-tight tracking-tight text-stone-900">
+                  {top.title}
+                </h2>
+                <p className="mt-1 text-xs uppercase tracking-wide text-stone-500">
+                  {top.source}
+                  <span className="mx-2 text-stone-300">·</span>
+                  {timeAgo(top.published_date)}
+                </p>
+                <p className="mt-4 text-base leading-relaxed text-stone-700">{top.summary}</p>
+                <p className="mt-3 border-l-2 border-[var(--accent)] pl-3 text-sm italic text-stone-600">
+                  {top.why_it_matters}
+                </p>
                 <div className="mt-4 flex flex-wrap items-center gap-2 text-xs">
-                  <span className={`rounded-full px-2 py-1 ${scoreClass(Number(top.final_score || 0))}`}>
+                  <span className={`rounded-sm border border-stone-200 px-2 py-0.5 ${scoreClass(Number(top.final_score || 0))}`}>
                     Score {top.final_score}
                   </span>
-                  <span className="rounded-full bg-indigo-100 px-2 py-1 text-indigo-800">
+                  <span className="rounded-sm border border-stone-200 bg-stone-50 px-2 py-0.5 text-stone-800">
                     {top.category || "unknown"}
                   </span>
-                  <span className={`rounded-full px-2 py-1 ${badgeClass(top.recommended_action)}`}>
+                  <span className={`rounded-sm border border-stone-200 px-2 py-0.5 ${badgeClass(top.recommended_action)}`}>
                     {top.recommended_action}
                   </span>
-                  <span className="text-slate-500">{top.source}</span>
-                  <span className="text-slate-400">{timeAgo(top.published_date)}</span>
                 </div>
-                <div className="mt-4 flex flex-wrap gap-2">
+                <div className="mt-5 flex flex-wrap gap-2">
                   {top.url ? (
                     <a
                       href={top.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700"
+                      className="rounded-sm border border-stone-900 bg-stone-900 px-4 py-2 text-sm font-semibold text-white hover:bg-stone-800"
                     >
-                      Read Story
+                      Full article
                     </a>
                   ) : null}
                   <button
                     onClick={() => setTriage(top, "testing")}
-                    className="rounded-md bg-green-600 px-3 py-1.5 text-xs font-medium text-white"
+                    className="rounded-sm border border-green-700 bg-green-50 px-3 py-1.5 text-xs font-semibold text-green-900 hover:bg-green-100"
                   >
-                    Move to Testing
+                    Move to testing
                   </button>
                   <button
                     onClick={() => setTriage(top, "watch")}
-                    className="rounded-md bg-amber-600 px-3 py-1.5 text-xs font-medium text-white"
+                    className="rounded-sm border border-amber-700 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-900 hover:bg-amber-100"
                   >
-                    Move to Watch
+                    Move to watch
                   </button>
                 </div>
               </>
             ) : (
-              <p className="text-sm text-slate-500">No top story available.</p>
+              <p className="mt-4 text-sm text-stone-500">No lead story for the current filters.</p>
             )}
           </article>
 
-          <aside className="rounded-2xl border border-slate-200 bg-white p-5">
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-600">
-              Trending Now
+          <aside className="bg-[var(--paper-card)] p-5">
+            <h3 className="border-b border-stone-200 pb-2 font-headline text-sm font-bold uppercase tracking-wide text-stone-800">
+              Trending
             </h3>
-            <div className="mt-3 space-y-3">
+            <p className="mt-2 text-[10px] font-medium uppercase tracking-wider text-stone-500">
+              By signal strength
+            </p>
+            <div className="mt-4 space-y-0 divide-y divide-stone-200">
               {trendingNow.slice(0, 6).map((item) => (
-                <div key={getItemKey(item)} className="border-b border-slate-100 pb-3 last:border-b-0">
-                  <p className="text-sm font-medium leading-snug text-slate-900">{item.title}</p>
-                  <div className="mt-1 flex items-center gap-2 text-xs text-slate-500">
-                    <span className={`rounded-full px-2 py-0.5 ${scoreClass(Number(item.final_score || 0))}`}>
+                <div key={getItemKey(item)} className="py-3 first:pt-0">
+                  <p className="font-headline text-sm font-semibold leading-snug text-stone-900">{item.title}</p>
+                  <div className="mt-1.5 flex flex-wrap items-center gap-2 text-[11px] text-stone-500">
+                    <span className={`rounded-sm px-1.5 py-0.5 ${scoreClass(Number(item.final_score || 0))}`}>
                       {item.final_score}
                     </span>
                     <span>{item.source}</span>
@@ -646,39 +777,43 @@ export default function Home() {
           </aside>
         </section>
 
-        <section className="mb-8 grid gap-4 lg:grid-cols-3">
-          <div className="rounded-2xl border border-slate-200 bg-white p-4">
-            <h3 className="text-sm font-semibold">New Candidates</h3>
-            <p className="mt-1 text-2xl font-semibold">{newItems.length}</p>
+        <section className="mb-8 grid gap-px overflow-hidden border border-stone-300 bg-stone-300 sm:grid-cols-3">
+          <div className="bg-[var(--paper-card)] p-4">
+            <h3 className="text-[10px] font-bold uppercase tracking-wider text-stone-500">Desk · New</h3>
+            <p className="font-headline mt-1 text-2xl font-bold text-stone-900">{newItems.length}</p>
+            <p className="mt-1 text-xs text-stone-500">Untriaged candidates</p>
           </div>
-          <div className="rounded-2xl border border-slate-200 bg-white p-4">
-            <h3 className="text-sm font-semibold">Testing This Week</h3>
-            <p className="mt-1 text-2xl font-semibold">{testingItems.length}</p>
+          <div className="bg-[var(--paper-card)] p-4">
+            <h3 className="text-[10px] font-bold uppercase tracking-wider text-stone-500">Desk · Testing</h3>
+            <p className="font-headline mt-1 text-2xl font-bold text-stone-900">{testingItems.length}</p>
+            <p className="mt-1 text-xs text-stone-500">In evaluation</p>
           </div>
-          <div className="rounded-2xl border border-slate-200 bg-white p-4">
-            <h3 className="text-sm font-semibold">Watchlist</h3>
-            <p className="mt-1 text-2xl font-semibold">{watchItems.length}</p>
+          <div className="bg-[var(--paper-card)] p-4">
+            <h3 className="text-[10px] font-bold uppercase tracking-wider text-stone-500">Desk · Watchlist</h3>
+            <p className="font-headline mt-1 text-2xl font-bold text-stone-900">{watchItems.length}</p>
+            <p className="mt-1 text-xs text-stone-500">On your radar</p>
           </div>
         </section>
 
-        <section className="mb-8 grid gap-5 lg:grid-cols-2">
-          <div className="rounded-2xl border border-slate-200 bg-white p-5">
-            <h3 className="text-lg font-semibold">Latest Tools</h3>
-            <p className="mb-3 text-xs text-slate-500">Product launches and repositories</p>
-            <div className="space-y-3">
+        <section className="mb-8 grid gap-px overflow-hidden border border-stone-300 bg-stone-300 lg:grid-cols-2">
+          <div className="bg-[var(--paper-card)] p-5">
+            <div className="rule-thin mb-3" />
+            <h3 className="font-headline text-xl font-bold text-stone-900">Tools & launches</h3>
+            <p className="mt-1 text-xs text-stone-500">Product Hunt, GitHub, and shipped tools</p>
+            <div className="mt-4 space-y-0 divide-y divide-stone-200">
               {latestTools.map((item) => (
-                <article key={getItemKey(item)} className="rounded-lg border border-slate-100 p-3">
+                <article key={getItemKey(item)} className="py-3 first:pt-0">
                   <div className="flex items-start justify-between gap-2">
-                    <h4 className="text-sm font-medium text-slate-900">{item.title}</h4>
-                    <span className={`rounded-full px-2 py-0.5 text-xs ${scoreClass(Number(item.final_score || 0))}`}>
+                    <h4 className="font-headline text-sm font-semibold text-stone-900">{item.title}</h4>
+                    <span className={`shrink-0 rounded-sm px-1.5 py-0.5 text-xs ${scoreClass(Number(item.final_score || 0))}`}>
                       {item.final_score}
                     </span>
                   </div>
-                  <p className="mt-1 line-clamp-2 text-xs text-slate-600">{item.summary}</p>
-                  <div className="mt-2 flex items-center gap-2 text-xs text-slate-500">
+                  <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-stone-600">{item.summary}</p>
+                  <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] text-stone-500">
                     <span>{item.source}</span>
                     <span>{timeAgo(item.published_date)}</span>
-                    <span className={`rounded-full px-2 py-0.5 ${badgeClass(item.recommended_action)}`}>
+                    <span className={`rounded-sm px-1.5 py-0.5 ${badgeClass(item.recommended_action)}`}>
                       {item.recommended_action}
                     </span>
                   </div>
@@ -686,23 +821,24 @@ export default function Home() {
               ))}
             </div>
           </div>
-          <div className="rounded-2xl border border-slate-200 bg-white p-5">
-            <h3 className="text-lg font-semibold">Latest Articles & Research</h3>
-            <p className="mb-3 text-xs text-slate-500">HN + arXiv highlights for daily scan</p>
-            <div className="space-y-3">
+          <div className="bg-[var(--paper-card)] p-5">
+            <div className="rule-thin mb-3" />
+            <h3 className="font-headline text-xl font-bold text-stone-900">Research & discussion</h3>
+            <p className="mt-1 text-xs text-stone-500">arXiv and Hacker News worth reading</p>
+            <div className="mt-4 space-y-0 divide-y divide-stone-200">
               {latestResearch.map((item) => (
-                <article key={getItemKey(item)} className="rounded-lg border border-slate-100 p-3">
+                <article key={getItemKey(item)} className="py-3 first:pt-0">
                   <div className="flex items-start justify-between gap-2">
-                    <h4 className="text-sm font-medium text-slate-900">{item.title}</h4>
-                    <span className={`rounded-full px-2 py-0.5 text-xs ${scoreClass(Number(item.final_score || 0))}`}>
+                    <h4 className="font-headline text-sm font-semibold text-stone-900">{item.title}</h4>
+                    <span className={`shrink-0 rounded-sm px-1.5 py-0.5 text-xs ${scoreClass(Number(item.final_score || 0))}`}>
                       {item.final_score}
                     </span>
                   </div>
-                  <p className="mt-1 line-clamp-2 text-xs text-slate-600">{item.summary}</p>
-                  <div className="mt-2 flex items-center gap-2 text-xs text-slate-500">
+                  <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-stone-600">{item.summary}</p>
+                  <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] text-stone-500">
                     <span>{item.source}</span>
                     <span>{timeAgo(item.published_date)}</span>
-                    <span className={`rounded-full px-2 py-0.5 ${badgeClass(item.recommended_action)}`}>
+                    <span className={`rounded-sm px-1.5 py-0.5 ${badgeClass(item.recommended_action)}`}>
                       {item.recommended_action}
                     </span>
                   </div>
@@ -712,23 +848,23 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="mb-8 rounded-2xl border border-slate-200 bg-white p-5">
-          <h3 className="text-lg font-semibold">Top Headlines</h3>
-          <p className="mb-3 text-xs text-slate-500">Editorial-style summary of highest ranked signals</p>
-          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+        <section className="mb-8 border border-stone-300 bg-[var(--paper-card)] p-5 shadow-sm">
+          <h3 className="font-headline text-xl font-bold text-stone-900">Front page · headlines</h3>
+          <p className="mt-1 text-xs text-stone-500">Highest-ranked items across all sources</p>
+          <div className="mt-4 grid gap-px bg-stone-200 sm:grid-cols-2 lg:grid-cols-3">
             {topStories.map((item) => (
               <a
                 key={getItemKey(item)}
                 href={item.url || "#"}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="rounded-lg border border-slate-100 p-3 transition hover:border-slate-300"
+                className="bg-[var(--paper-card)] p-4 transition hover:bg-stone-50"
               >
-                <p className="text-sm font-medium text-slate-900">{item.title}</p>
-                <div className="mt-2 flex items-center gap-2 text-xs text-slate-500">
+                <p className="font-headline text-sm font-semibold leading-snug text-stone-900">{item.title}</p>
+                <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] text-stone-500">
                   <span>{item.source}</span>
                   <span>{timeAgo(item.published_date)}</span>
-                  <span className={`rounded-full px-2 py-0.5 ${scoreClass(Number(item.final_score || 0))}`}>
+                  <span className={`rounded-sm px-1.5 py-0.5 ${scoreClass(Number(item.final_score || 0))}`}>
                     {item.final_score}
                   </span>
                 </div>
@@ -737,43 +873,45 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="mb-8 rounded-2xl border border-slate-200 bg-white">
-          <div className="border-b border-slate-200 px-6 py-4">
-            <h3 className="text-lg font-semibold">Source Quality</h3>
+        <section className="mb-8 border border-stone-300 bg-[var(--paper-card)] shadow-sm">
+          <div className="border-b border-stone-200 px-5 py-4">
+            <h3 className="font-headline text-lg font-bold text-stone-900">Source desk</h3>
+            <p className="mt-1 text-xs text-stone-500">Volume and average score by feed</p>
           </div>
-          <div className="border-b border-slate-200 px-6 py-4">
-            <p className="mb-2 text-sm font-medium text-slate-700">Score Trend (last 14 days)</p>
+          <div className="border-b border-stone-200 px-5 py-4">
+            <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-stone-500">
+              Score trend · 14 days
+            </p>
             {scoreTrend ? (
-              <svg viewBox="0 0 100 100" className="h-20 w-full">
+              <svg viewBox="0 0 100 100" className="h-20 w-full text-[var(--accent)]">
                 <polyline
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="2"
-                  className="text-indigo-600"
                   points={scoreTrend}
                 />
               </svg>
             ) : (
-              <p className="text-xs text-slate-500">Not enough dated points to render trend.</p>
+              <p className="text-xs text-stone-500">Not enough dated points to render trend.</p>
             )}
           </div>
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
-              <thead className="bg-slate-50 text-left text-slate-600">
+              <thead className="border-b border-stone-200 bg-stone-100 text-left text-stone-700">
                 <tr>
                   <th className="px-4 py-3 font-semibold">Source</th>
                   <th className="px-4 py-3 font-semibold">Items</th>
-                  <th className="px-4 py-3 font-semibold">Avg Score</th>
-                  <th className="px-4 py-3 font-semibold">Test Rate</th>
+                  <th className="px-4 py-3 font-semibold">Avg score</th>
+                  <th className="px-4 py-3 font-semibold">Test rate</th>
                 </tr>
               </thead>
               <tbody>
                 {sourceMetrics.map(([name, metric]) => (
-                  <tr key={name} className="border-t border-slate-200">
-                    <td className="px-4 py-3">{name}</td>
-                    <td className="px-4 py-3">{metric.count}</td>
-                    <td className="px-4 py-3">{metric.avgScore.toFixed(2)}</td>
-                    <td className="px-4 py-3">{metric.testRate.toFixed(0)}%</td>
+                  <tr key={name} className="border-t border-stone-200">
+                    <td className="px-4 py-3 font-medium text-stone-800">{name}</td>
+                    <td className="px-4 py-3 text-stone-700">{metric.count}</td>
+                    <td className="px-4 py-3 text-stone-700">{metric.avgScore.toFixed(2)}</td>
+                    <td className="px-4 py-3 text-stone-700">{metric.testRate.toFixed(0)}%</td>
                   </tr>
                 ))}
               </tbody>
@@ -781,17 +919,20 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white">
-          <div className="border-b border-slate-200 px-6 py-4">
+        <section className="border border-stone-300 bg-[var(--paper-card)] shadow-sm">
+          <div className="border-b border-stone-200 px-5 py-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <h3 className="text-lg font-semibold">All Ranked Items</h3>
+              <div>
+                <h3 className="font-headline text-lg font-bold text-stone-900">Archive · all ranked items</h3>
+                <p className="mt-1 text-xs text-stone-500">Sort, triage, and open sources</p>
+              </div>
               <div className="flex items-center gap-2 text-sm">
-                <label htmlFor="page-size" className="text-slate-500">
-                  Rows
+                <label htmlFor="page-size" className="text-stone-500">
+                  Rows per page
                 </label>
                 <select
                   id="page-size"
-                  className="rounded-md border border-slate-300 px-2 py-1 text-sm"
+                  className="rounded-sm border border-stone-300 bg-white px-2 py-1 text-sm"
                   value={pageSize}
                   onChange={(e) => setPageSize(Number(e.target.value))}
                 >
@@ -802,46 +943,46 @@ export default function Home() {
               </div>
             </div>
           </div>
-          <div className="divide-y divide-slate-200">
+          <div className="divide-y divide-stone-200">
             {loading ? (
-              <div className="px-6 py-8 text-slate-500">Loading items from webhook...</div>
+              <div className="px-6 py-10 text-center text-sm text-stone-500">
+                Loading edition from webhook…
+              </div>
             ) : error ? (
               <div className="px-6 py-8">
-                <p className="text-red-600">Could not load webhook data: {error}</p>
+                <p className="text-red-700">Could not load data: {error}</p>
                 <button
                   onClick={loadItems}
-                  className="mt-3 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700"
+                  className="mt-3 rounded-sm border border-stone-400 bg-white px-3 py-1.5 text-sm text-stone-800 hover:bg-stone-50"
                 >
                   Retry
                 </button>
               </div>
             ) : items.length === 0 ? (
-              <div className="px-6 py-8 text-slate-500">
-                Webhook returned zero items. Check your n8n workflow run and sheet data.
+              <div className="px-6 py-8 text-sm text-stone-500">
+                No rows returned. Check your n8n run and sheet.
               </div>
             ) : filtered.length === 0 ? (
               <div className="px-6 py-8">
-                <p className="text-slate-500">
-                  No items match your current filters.
-                </p>
+                <p className="text-stone-600">Nothing matches these filters.</p>
                 <button
                   onClick={resetFilters}
-                  className="mt-3 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700"
+                  className="mt-3 rounded-sm border border-stone-400 bg-white px-3 py-1.5 text-sm text-stone-800 hover:bg-stone-50"
                 >
-                  Reset Filters
+                  Reset filters
                 </button>
               </div>
             ) : viewMode === "cards" ? (
               paginated.map((item) => (
-                <article key={item.id || item.url} className="px-6 py-5">
+                <article key={item.id || item.url} className="px-5 py-5">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
-                      <h4 className="text-lg font-medium">{item.title}</h4>
-                      <p className="mt-1 text-sm text-slate-600 line-clamp-2">{item.summary}</p>
-                      <p className="mt-1 text-sm text-slate-500">{item.why_it_matters}</p>
+                      <h4 className="font-headline text-lg font-semibold text-stone-900">{item.title}</h4>
+                      <p className="mt-1 text-sm text-stone-600 line-clamp-2">{item.summary}</p>
+                      <p className="mt-1 text-sm text-stone-500">{item.why_it_matters}</p>
                     </div>
                     <span
-                      className={`rounded-full px-3 py-1 text-sm ${scoreClass(
+                      className={`rounded-sm border border-stone-200 px-3 py-1 text-sm ${scoreClass(
                         Number(item.final_score || 0),
                       )}`}
                     >
@@ -849,42 +990,42 @@ export default function Home() {
                     </span>
                   </div>
                   <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
-                    <span className="rounded-full bg-indigo-100 px-2 py-1 text-indigo-800">
+                    <span className="rounded-sm border border-stone-200 bg-stone-50 px-2 py-1 text-stone-800">
                       {item.category || "unknown"}
                     </span>
-                    <span className={`rounded-full px-2 py-1 ${badgeClass(item.recommended_action)}`}>
+                    <span className={`rounded-sm border border-stone-200 px-2 py-1 ${badgeClass(item.recommended_action)}`}>
                       {item.recommended_action}
                     </span>
                     {triageMap[getItemKey(item)] ? (
-                      <span className={`rounded-full px-2 py-1 ${badgeClass(triageMap[getItemKey(item)])}`}>
+                      <span className={`rounded-sm border border-stone-200 px-2 py-1 ${badgeClass(triageMap[getItemKey(item)])}`}>
                         {triageMap[getItemKey(item)]}
                       </span>
                     ) : null}
-                    <span className="text-slate-500">{item.source}</span>
-                    <span className="text-slate-400">{item.published_date}</span>
+                    <span className="text-stone-500">{item.source}</span>
+                    <span className="text-stone-400">{item.published_date}</span>
                   </div>
                   <div className="mt-3 flex flex-wrap gap-2">
                     <button
                       onClick={() => setTriage(item, "testing")}
-                      className="rounded-md border border-green-200 bg-green-50 px-2.5 py-1 text-xs text-green-700"
+                      className="rounded-sm border border-green-700 bg-green-50 px-2.5 py-1 text-xs font-medium text-green-900"
                     >
                       Testing
                     </button>
                     <button
                       onClick={() => setTriage(item, "watch")}
-                      className="rounded-md border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs text-amber-700"
+                      className="rounded-sm border border-amber-700 bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-900"
                     >
                       Watch
                     </button>
                     <button
                       onClick={() => setTriage(item, "adopted")}
-                      className="rounded-md border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs text-blue-700"
+                      className="rounded-sm border border-blue-800 bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-900"
                     >
                       Adopted
                     </button>
                     <button
                       onClick={() => setTriage(item, "ignored")}
-                      className="rounded-md border border-slate-200 bg-slate-100 px-2.5 py-1 text-xs text-slate-700"
+                      className="rounded-sm border border-stone-300 bg-stone-100 px-2.5 py-1 text-xs font-medium text-stone-800"
                     >
                       Ignore
                     </button>
@@ -894,8 +1035,8 @@ export default function Home() {
             ) : (
               <div className="overflow-x-auto">
                 <table className="min-w-full text-sm">
-                  <thead className="sticky top-0 z-10 bg-slate-50">
-                    <tr className="text-left text-slate-600">
+                  <thead className="sticky top-0 z-10 border-b border-stone-200 bg-stone-100">
+                    <tr className="text-left text-stone-700">
                       <th className="px-4 py-3 font-semibold">Title</th>
                       <th className="px-4 py-3 font-semibold">Source</th>
                       <th className="px-4 py-3 font-semibold">Category</th>
@@ -908,25 +1049,25 @@ export default function Home() {
                   </thead>
                   <tbody>
                     {paginated.map((item) => (
-                      <tr key={item.id || item.url} className="border-t border-slate-200 align-top">
+                      <tr key={item.id || item.url} className="border-t border-stone-200 align-top">
                         <td className="max-w-md px-4 py-3">
-                          <p className="font-medium text-slate-900">{item.title}</p>
-                          <p className="mt-1 line-clamp-2 text-xs text-slate-500">{item.summary}</p>
+                          <p className="font-headline font-semibold text-stone-900">{item.title}</p>
+                          <p className="mt-1 line-clamp-2 text-xs text-stone-500">{item.summary}</p>
                         </td>
-                        <td className="px-4 py-3 text-slate-700">{item.source}</td>
+                        <td className="px-4 py-3 text-stone-700">{item.source}</td>
                         <td className="px-4 py-3">
-                          <span className="rounded-full bg-indigo-100 px-2 py-1 text-xs text-indigo-800">
+                          <span className="rounded-sm border border-stone-200 bg-stone-50 px-2 py-1 text-xs text-stone-800">
                             {item.category || "unknown"}
                           </span>
                         </td>
                         <td className="px-4 py-3">
-                          <span className={`rounded-full px-2 py-1 text-xs ${badgeClass(item.recommended_action)}`}>
+                          <span className={`rounded-sm border border-stone-200 px-2 py-1 text-xs ${badgeClass(item.recommended_action)}`}>
                             {item.recommended_action}
                           </span>
                         </td>
                         <td className="px-4 py-3">
                           <select
-                            className="rounded-md border border-slate-300 px-2 py-1 text-xs"
+                            className="rounded-sm border border-stone-300 bg-white px-2 py-1 text-xs"
                             value={triageMap[getItemKey(item)] || "new"}
                             onChange={(e) => setTriage(item, e.target.value as TriageStatus)}
                           >
@@ -938,11 +1079,11 @@ export default function Home() {
                           </select>
                         </td>
                         <td className="px-4 py-3">
-                          <span className={`rounded-full px-2 py-1 text-xs ${scoreClass(Number(item.final_score || 0))}`}>
+                          <span className={`rounded-sm border border-stone-200 px-2 py-1 text-xs ${scoreClass(Number(item.final_score || 0))}`}>
                             {item.final_score}
                           </span>
                         </td>
-                        <td className="whitespace-nowrap px-4 py-3 text-slate-500">
+                        <td className="whitespace-nowrap px-4 py-3 text-stone-500">
                           {item.published_date}
                         </td>
                         <td className="px-4 py-3">
@@ -950,7 +1091,7 @@ export default function Home() {
                             href={item.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-blue-600 hover:underline"
+                            className="font-medium text-[var(--accent)] underline-offset-2 hover:underline"
                           >
                             Open
                           </a>
@@ -963,26 +1104,25 @@ export default function Home() {
             )}
           </div>
           {filtered.length > 0 ? (
-            <div className="flex items-center justify-between border-t border-slate-200 px-6 py-4 text-sm">
-              <p className="text-slate-500">
-                Showing {(page - 1) * pageSize + 1}-{Math.min(page * pageSize, filtered.length)} of{" "}
-                {filtered.length}
+            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-stone-200 bg-stone-50 px-5 py-4 text-sm">
+              <p className="text-stone-600">
+                Showing {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, filtered.length)} of {filtered.length}
               </p>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={page === 1}
-                  className="rounded-md border border-slate-300 px-3 py-1.5 disabled:opacity-40"
+                  className="rounded-sm border border-stone-400 bg-white px-3 py-1.5 text-stone-800 hover:bg-stone-100 disabled:opacity-40"
                 >
-                  Prev
+                  Previous
                 </button>
-                <span className="text-slate-700">
-                  {page}/{totalPages}
+                <span className="text-stone-700">
+                  Page {page} of {totalPages}
                 </span>
                 <button
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                   disabled={page === totalPages}
-                  className="rounded-md border border-slate-300 px-3 py-1.5 disabled:opacity-40"
+                  className="rounded-sm border border-stone-400 bg-white px-3 py-1.5 text-stone-800 hover:bg-stone-100 disabled:opacity-40"
                 >
                   Next
                 </button>
@@ -990,6 +1130,14 @@ export default function Home() {
             </div>
           ) : null}
         </section>
+
+        <footer className="mt-10 border-t border-stone-300 pt-6 text-center text-xs text-stone-500">
+          <p className="font-headline text-stone-600">AI Tool Radar</p>
+          <p className="mt-1">
+            Signals from Hacker News, Product Hunt, GitHub, and arXiv — ranked for your lab.
+          </p>
+          {lastUpdated ? <p className="mt-2 text-stone-400">Last refresh (local): {lastUpdated}</p> : null}
+        </footer>
       </div>
     </main>
   );
