@@ -7,7 +7,7 @@
           "interval": [
             {
               "triggerAtHour": 8,
-              "triggerAtMinute": 1
+              "triggerAtMinute": 0
             }
           ]
         }
@@ -402,7 +402,7 @@
           "interval": [
             {
               "triggerAtHour": 8,
-              "triggerAtMinute": 1
+              "triggerAtMinute": 20
             }
           ]
         }
@@ -536,7 +536,7 @@
       "name": "Product hunt",
       "retryOnFail": true,
       "maxTries": 3,
-      "waitBetweenTries": 2000,
+      "waitBetweenTries": 5000,
       "alwaysOutputData": true
     },
     {
@@ -580,8 +580,8 @@
       "id": "78c5200a-83ea-4b53-b278-f4e939cb66b6",
       "name": "Open AI",
       "retryOnFail": true,
-      "maxTries": 3,
-      "waitBetweenTries": 3000,
+      "maxTries": 4,
+      "waitBetweenTries": 5000,
       "alwaysOutputData": true
     },
     {
@@ -617,6 +617,10 @@
             {
               "name": "Accept",
               "value": "application/vnd.github+json"
+            },
+            {
+              "name": "User-Agent",
+              "value": "AI-Tool-Radar/1.0 (mailto:sadia.waseem4487@gmail.com; n8n collector)"
             }
           ]
         },
@@ -634,7 +638,7 @@
       "name": "GitHub Trending",
       "retryOnFail": true,
       "maxTries": 3,
-      "waitBetweenTries": 2000,
+      "waitBetweenTries": 5000,
       "alwaysOutputData": true
     },
     {
@@ -652,7 +656,35 @@
     },
     {
       "parameters": {
+        "resume": "timeInterval",
+        "amount": 12,
+        "unit": "seconds"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        160,
+        -336
+      ],
+      "id": "b2e9c4a1-7d8f-4a2e-9b0c-waitbeforearxiv",
+      "name": "Wait before arXiv"
+    },
+    {
+      "parameters": {
         "url": "https://export.arxiv.org/api/query?search_query=all:artificial+intelligence&start=0&max_results=5",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "AI-Tool-Radar/1.0 (mailto:sadia.waseem4487@gmail.com; collector n8n workflow)"
+            },
+            {
+              "name": "Accept",
+              "value": "application/atom+xml"
+            }
+          ]
+        },
         "options": {
           "timeout": 30000
         }
@@ -666,8 +698,8 @@
       "id": "88cc03e3-7979-4254-91b0-77bb5703c8ae",
       "name": "HTTP Request",
       "retryOnFail": true,
-      "maxTries": 3,
-      "waitBetweenTries": 2000,
+      "maxTries": 5,
+      "waitBetweenTries": 20000,
       "alwaysOutputData": true
     },
     {
@@ -808,7 +840,7 @@
             "index": 0
           },
           {
-            "node": "HTTP Request",
+            "node": "Wait before arXiv",
             "type": "main",
             "index": 0
           }
@@ -974,6 +1006,17 @@
         [
           {
             "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait before arXiv": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
             "type": "main",
             "index": 0
           }
