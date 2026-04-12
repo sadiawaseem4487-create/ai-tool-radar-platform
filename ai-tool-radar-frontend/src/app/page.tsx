@@ -357,6 +357,18 @@ export default function Home() {
     [filtered],
   );
 
+  const isFrontPage = source === "all";
+
+  /** Cross-feed “wire”: newest items with real URLs (not filtered by section). */
+  const wireItems = useMemo(
+    () =>
+      [...items]
+        .filter((i) => i.url && /^https?:\/\//i.test(String(i.url).trim()))
+        .sort((a, b) => parseDate(b.published_date) - parseDate(a.published_date))
+        .slice(0, 24),
+    [items],
+  );
+
   const topStories = useMemo(() => [...filtered].slice(0, 6), [filtered]);
   const trendingNow = useMemo(
     () => [...filtered].filter((x) => Number(x.final_score || 0) >= 7).slice(0, 8),
@@ -369,11 +381,9 @@ export default function Home() {
         .slice(0, 8),
     [latestByDate],
   );
-  const latestResearch = useMemo(
-    () =>
-      latestByDate
-        .filter((x) => x.source === "arXiv" || x.source === "HackerNews")
-        .slice(0, 8),
+  /** Front-page research column: arXiv papers only (no HN / Medium mixed in). */
+  const latestArxivPapers = useMemo(
+    () => latestByDate.filter((x) => x.source === "arXiv").slice(0, 8),
     [latestByDate],
   );
 
@@ -410,6 +420,22 @@ export default function Home() {
     day: "numeric",
     year: "numeric",
   });
+
+  const streamSectionTitle =
+    source === "all"
+      ? "Front page · headlines"
+      : source === "ProductHunt"
+        ? "Product Hunt · top items"
+        : source === "GitHub"
+          ? "GitHub · top repositories"
+          : source === "arXiv"
+            ? "Research · arXiv papers"
+            : "News & links · Hacker News";
+
+  const archiveSectionTitle =
+    source === "all"
+      ? "Archive · all ranked items"
+      : `Archive · ${source === "ProductHunt" ? "Product Hunt" : source === "HackerNews" ? "Hacker News" : source}`;
 
   return (
     <main className="min-h-screen bg-[var(--paper)] text-[var(--ink)]">
@@ -481,8 +507,11 @@ export default function Home() {
                 resetFilters();
                 setSource("all");
                 setCategory("all");
+                setPage(1);
               }}
-              className="rounded px-2 py-1 hover:bg-white hover:shadow-sm"
+              className={`rounded px-2 py-1 hover:bg-white hover:shadow-sm ${
+                isFrontPage ? "bg-white text-stone-900 shadow-sm ring-1 ring-stone-200" : ""
+              }`}
             >
               Front page
             </button>
@@ -491,8 +520,11 @@ export default function Home() {
               onClick={() => {
                 setSource("ProductHunt");
                 setCategory("all");
+                setPage(1);
               }}
-              className="rounded px-2 py-1 hover:bg-white hover:shadow-sm"
+              className={`rounded px-2 py-1 hover:bg-white hover:shadow-sm ${
+                source === "ProductHunt" ? "bg-white text-stone-900 shadow-sm ring-1 ring-stone-200" : ""
+              }`}
             >
               Product Hunt
             </button>
@@ -501,8 +533,11 @@ export default function Home() {
               onClick={() => {
                 setSource("GitHub");
                 setCategory("all");
+                setPage(1);
               }}
-              className="rounded px-2 py-1 hover:bg-white hover:shadow-sm"
+              className={`rounded px-2 py-1 hover:bg-white hover:shadow-sm ${
+                source === "GitHub" ? "bg-white text-stone-900 shadow-sm ring-1 ring-stone-200" : ""
+              }`}
             >
               GitHub
             </button>
@@ -511,8 +546,11 @@ export default function Home() {
               onClick={() => {
                 setSource("arXiv");
                 setCategory("all");
+                setPage(1);
               }}
-              className="rounded px-2 py-1 hover:bg-white hover:shadow-sm"
+              className={`rounded px-2 py-1 hover:bg-white hover:shadow-sm ${
+                source === "arXiv" ? "bg-white text-stone-900 shadow-sm ring-1 ring-stone-200" : ""
+              }`}
             >
               Research
             </button>
@@ -521,8 +559,11 @@ export default function Home() {
               onClick={() => {
                 setSource("HackerNews");
                 setCategory("all");
+                setPage(1);
               }}
-              className="rounded px-2 py-1 hover:bg-white hover:shadow-sm"
+              className={`rounded px-2 py-1 hover:bg-white hover:shadow-sm ${
+                source === "HackerNews" ? "bg-white text-stone-900 shadow-sm ring-1 ring-stone-200" : ""
+              }`}
             >
               News & links
             </button>
@@ -530,31 +571,9 @@ export default function Home() {
         </nav>
       </header>
 
-      {/* Headline ticker */}
-      {filtered.length > 0 ? (
-        <div className="border-b border-red-200 bg-[var(--accent-soft)]">
-          <div className="mx-auto flex max-w-6xl items-center gap-3 overflow-x-auto px-4 py-2 text-xs sm:px-6">
-            <span className="shrink-0 font-bold uppercase tracking-wide text-[var(--accent)]">
-              Wire
-            </span>
-            <div className="flex min-w-0 flex-1 flex-wrap gap-x-6 gap-y-1 text-stone-800">
-              {latestByDate.slice(0, 5).map((item) => (
-                <a
-                  key={getItemKey(item)}
-                  href={item.url || "#"}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="truncate hover:underline"
-                >
-                  {item.title}
-                </a>
-              ))}
-            </div>
-          </div>
-        </div>
-      ) : null}
-
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+        <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
+          <div className="min-w-0 flex-1 space-y-8">
         {/* Dateline stats */}
         <section className="mb-8 grid gap-px overflow-hidden rounded-sm border border-stone-300 bg-stone-300 sm:grid-cols-2 lg:grid-cols-4">
           <div className="bg-[var(--paper-card)] p-4">
@@ -587,17 +606,28 @@ export default function Home() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
-            <select
-              className="rounded-sm border border-stone-300 bg-white px-3 py-2 text-sm"
-              value={source}
-              onChange={(e) => setSource(e.target.value)}
-            >
-              {sources.map((s) => (
-                <option key={s} value={s}>
-                  Source: {s}
-                </option>
-              ))}
-            </select>
+            {isFrontPage ? (
+              <select
+                className="rounded-sm border border-stone-300 bg-white px-3 py-2 text-sm"
+                value={source}
+                onChange={(e) => {
+                  setSource(e.target.value);
+                  setPage(1);
+                }}
+              >
+                {sources.map((s) => (
+                  <option key={s} value={s}>
+                    Source: {s}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <div className="flex items-center text-sm">
+                <span className="rounded-sm border border-[var(--accent)] bg-[var(--accent-soft)] px-3 py-2 text-xs font-bold uppercase tracking-wide text-stone-800">
+                  {source}
+                </span>
+              </div>
+            )}
             <select
               className="rounded-sm border border-stone-300 bg-white px-3 py-2 text-sm"
               value={category}
@@ -701,7 +731,18 @@ export default function Home() {
             {top ? (
               <>
                 <h2 className="font-headline mt-3 text-3xl font-bold leading-tight tracking-tight text-stone-900">
-                  {top.title}
+                  {top.url ? (
+                    <a
+                      href={top.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-stone-900 underline-offset-2 hover:text-[var(--accent)] hover:underline"
+                    >
+                      {top.title}
+                    </a>
+                  ) : (
+                    top.title
+                  )}
                 </h2>
                 <p className="mt-1 text-xs uppercase tracking-wide text-stone-500">
                   {top.source}
@@ -763,7 +804,20 @@ export default function Home() {
             <div className="mt-4 space-y-0 divide-y divide-stone-200">
               {trendingNow.slice(0, 6).map((item) => (
                 <div key={getItemKey(item)} className="py-3 first:pt-0">
-                  <p className="font-headline text-sm font-semibold leading-snug text-stone-900">{item.title}</p>
+                  <p className="font-headline text-sm font-semibold leading-snug text-stone-900">
+                    {item.url ? (
+                      <a
+                        href={item.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-stone-900 underline-offset-2 hover:text-[var(--accent)] hover:underline"
+                      >
+                        {item.title}
+                      </a>
+                    ) : (
+                      item.title
+                    )}
+                  </p>
                   <div className="mt-1.5 flex flex-wrap items-center gap-2 text-[11px] text-stone-500">
                     <span className={`rounded-sm px-1.5 py-0.5 ${scoreClass(Number(item.final_score || 0))}`}>
                       {item.final_score}
@@ -777,6 +831,7 @@ export default function Home() {
           </aside>
         </section>
 
+        {isFrontPage ? (
         <section className="mb-8 grid gap-px overflow-hidden border border-stone-300 bg-stone-300 sm:grid-cols-3">
           <div className="bg-[var(--paper-card)] p-4">
             <h3 className="text-[10px] font-bold uppercase tracking-wider text-stone-500">Desk · New</h3>
@@ -794,7 +849,9 @@ export default function Home() {
             <p className="mt-1 text-xs text-stone-500">On your radar</p>
           </div>
         </section>
+        ) : null}
 
+        {isFrontPage ? (
         <section className="mb-8 grid gap-px overflow-hidden border border-stone-300 bg-stone-300 lg:grid-cols-2">
           <div className="bg-[var(--paper-card)] p-5">
             <div className="rule-thin mb-3" />
@@ -804,7 +861,20 @@ export default function Home() {
               {latestTools.map((item) => (
                 <article key={getItemKey(item)} className="py-3 first:pt-0">
                   <div className="flex items-start justify-between gap-2">
-                    <h4 className="font-headline text-sm font-semibold text-stone-900">{item.title}</h4>
+                    <h4 className="font-headline text-sm font-semibold text-stone-900">
+                      {item.url ? (
+                        <a
+                          href={item.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-stone-900 underline-offset-2 hover:text-[var(--accent)] hover:underline"
+                        >
+                          {item.title}
+                        </a>
+                      ) : (
+                        item.title
+                      )}
+                    </h4>
                     <span className={`shrink-0 rounded-sm px-1.5 py-0.5 text-xs ${scoreClass(Number(item.final_score || 0))}`}>
                       {item.final_score}
                     </span>
@@ -823,13 +893,26 @@ export default function Home() {
           </div>
           <div className="bg-[var(--paper-card)] p-5">
             <div className="rule-thin mb-3" />
-            <h3 className="font-headline text-xl font-bold text-stone-900">Research & discussion</h3>
-            <p className="mt-1 text-xs text-stone-500">arXiv and Hacker News worth reading</p>
+            <h3 className="font-headline text-xl font-bold text-stone-900">Research papers</h3>
+            <p className="mt-1 text-xs text-stone-500">arXiv only — open any title for the canonical paper link</p>
             <div className="mt-4 space-y-0 divide-y divide-stone-200">
-              {latestResearch.map((item) => (
+              {latestArxivPapers.map((item) => (
                 <article key={getItemKey(item)} className="py-3 first:pt-0">
                   <div className="flex items-start justify-between gap-2">
-                    <h4 className="font-headline text-sm font-semibold text-stone-900">{item.title}</h4>
+                    <h4 className="font-headline text-sm font-semibold text-stone-900">
+                      {item.url ? (
+                        <a
+                          href={item.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-stone-900 underline-offset-2 hover:text-[var(--accent)] hover:underline"
+                        >
+                          {item.title}
+                        </a>
+                      ) : (
+                        item.title
+                      )}
+                    </h4>
                     <span className={`shrink-0 rounded-sm px-1.5 py-0.5 text-xs ${scoreClass(Number(item.final_score || 0))}`}>
                       {item.final_score}
                     </span>
@@ -847,10 +930,15 @@ export default function Home() {
             </div>
           </div>
         </section>
+        ) : null}
 
         <section className="mb-8 border border-stone-300 bg-[var(--paper-card)] p-5 shadow-sm">
-          <h3 className="font-headline text-xl font-bold text-stone-900">Front page · headlines</h3>
-          <p className="mt-1 text-xs text-stone-500">Highest-ranked items across all sources</p>
+          <h3 className="font-headline text-xl font-bold text-stone-900">{streamSectionTitle}</h3>
+          <p className="mt-1 text-xs text-stone-500">
+            {isFrontPage
+              ? "Highest-ranked items across all sources — each card opens the original URL."
+              : "Top items in this feed only — click a headline to open the source."}
+          </p>
           <div className="mt-4 grid gap-px bg-stone-200 sm:grid-cols-2 lg:grid-cols-3">
             {topStories.map((item) => (
               <a
@@ -873,6 +961,7 @@ export default function Home() {
           </div>
         </section>
 
+        {isFrontPage ? (
         <section className="mb-8 border border-stone-300 bg-[var(--paper-card)] shadow-sm">
           <div className="border-b border-stone-200 px-5 py-4">
             <h3 className="font-headline text-lg font-bold text-stone-900">Source desk</h3>
@@ -918,12 +1007,13 @@ export default function Home() {
             </table>
           </div>
         </section>
+        ) : null}
 
         <section className="border border-stone-300 bg-[var(--paper-card)] shadow-sm">
           <div className="border-b border-stone-200 px-5 py-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
-                <h3 className="font-headline text-lg font-bold text-stone-900">Archive · all ranked items</h3>
+                <h3 className="font-headline text-lg font-bold text-stone-900">{archiveSectionTitle}</h3>
                 <p className="mt-1 text-xs text-stone-500">Sort, triage, and open sources</p>
               </div>
               <div className="flex items-center gap-2 text-sm">
@@ -977,7 +1067,20 @@ export default function Home() {
                 <article key={item.id || item.url} className="px-5 py-5">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
-                      <h4 className="font-headline text-lg font-semibold text-stone-900">{item.title}</h4>
+                      <h4 className="font-headline text-lg font-semibold text-stone-900">
+                        {item.url ? (
+                          <a
+                            href={item.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-stone-900 underline-offset-2 hover:text-[var(--accent)] hover:underline"
+                          >
+                            {item.title}
+                          </a>
+                        ) : (
+                          item.title
+                        )}
+                      </h4>
                       <p className="mt-1 text-sm text-stone-600 line-clamp-2">{item.summary}</p>
                       <p className="mt-1 text-sm text-stone-500">{item.why_it_matters}</p>
                     </div>
@@ -1051,7 +1154,20 @@ export default function Home() {
                     {paginated.map((item) => (
                       <tr key={item.id || item.url} className="border-t border-stone-200 align-top">
                         <td className="max-w-md px-4 py-3">
-                          <p className="font-headline font-semibold text-stone-900">{item.title}</p>
+                          <p className="font-headline font-semibold text-stone-900">
+                            {item.url ? (
+                              <a
+                                href={item.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-stone-900 underline-offset-2 hover:text-[var(--accent)] hover:underline"
+                              >
+                                {item.title}
+                              </a>
+                            ) : (
+                              item.title
+                            )}
+                          </p>
                           <p className="mt-1 line-clamp-2 text-xs text-stone-500">{item.summary}</p>
                         </td>
                         <td className="px-4 py-3 text-stone-700">{item.source}</td>
@@ -1130,6 +1246,43 @@ export default function Home() {
             </div>
           ) : null}
         </section>
+
+          </div>
+
+          <aside className="w-full shrink-0 border-t border-stone-200 pt-6 lg:sticky lg:top-4 lg:w-72 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
+            <div className="border border-stone-300 bg-[var(--paper-card)] shadow-sm">
+              <div className="border-b border-stone-200 bg-[var(--accent-soft)] px-3 py-2">
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--accent)]">Wire</p>
+                <p className="mt-0.5 text-[11px] text-stone-600">
+                  Latest across all feeds — click any line for the original source
+                </p>
+              </div>
+              <div className="max-h-[min(70vh,520px)] divide-y divide-stone-200 overflow-y-auto overscroll-contain text-sm">
+                {wireItems.length === 0 ? (
+                  <p className="p-3 text-xs text-stone-500">No linked items yet.</p>
+                ) : (
+                  wireItems.map((item) => (
+                    <a
+                      key={getItemKey(item)}
+                      href={item.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block px-3 py-2.5 transition hover:bg-stone-50"
+                    >
+                      <span className="text-[10px] font-semibold uppercase tracking-wide text-stone-500">
+                        {item.source}
+                      </span>
+                      <span className="mt-0.5 line-clamp-3 block font-medium leading-snug text-stone-900">
+                        {item.title}
+                      </span>
+                      <span className="mt-1 block text-[10px] text-stone-500">{timeAgo(item.published_date)}</span>
+                    </a>
+                  ))
+                )}
+              </div>
+            </div>
+          </aside>
+        </div>
 
         <footer className="mt-10 border-t border-stone-300 pt-6 text-center text-xs text-stone-500">
           <p className="font-headline text-stone-600">AI Tool Radar</p>
