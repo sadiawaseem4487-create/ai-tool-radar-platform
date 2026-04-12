@@ -36,3 +36,21 @@ body {
 .news-desk .rule-thin {
   border-top: 1px solid var(--rule);
 }
+
+/* Dense data tables — sans, small type (headlines stay serif elsewhere) */
+.news-desk .archive-table {
+  font-size: 0.8125rem;
+  line-height: 1.35;
+}
+
+.news-desk .archive-table th {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+.news-desk .archive-table td {
+  vertical-align: top;
+}

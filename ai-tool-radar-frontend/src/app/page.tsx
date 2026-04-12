@@ -473,18 +473,18 @@ export default function Home() {
 
       {/* Masthead */}
       <header className="border-b border-stone-300 bg-[var(--paper-card)]">
-        <div className="mx-auto max-w-6xl px-4 pt-8 pb-6 text-center sm:px-6">
-          <div className="rule-thick mx-auto mb-4 max-w-md" />
-          <p className="text-[10px] font-semibold uppercase tracking-[0.35em] text-stone-500">
+        <div className="mx-auto max-w-6xl px-4 pt-6 pb-4 text-center sm:px-6 sm:pt-7 sm:pb-5">
+          <div className="rule-thick mx-auto mb-3 max-w-xs sm:max-w-sm" />
+          <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-stone-500">
             Artificial intelligence · tools · research · signals
           </p>
-          <h1 className="font-headline mt-3 text-4xl font-bold tracking-tight text-stone-900 sm:text-5xl">
+          <h1 className="font-headline mt-2 text-3xl font-bold tracking-tight text-stone-900 sm:text-4xl">
             AI Tool Radar
           </h1>
-          <p className="mx-auto mt-2 max-w-2xl text-sm leading-relaxed text-stone-600">
+          <p className="mx-auto mt-2 max-w-xl text-[13px] leading-relaxed text-stone-600 sm:text-sm">
             A daily news desk for the latest AI tools, papers, and trending stories — curated and scored for your lab.
           </p>
-          <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-stone-500">
+          <div className="mt-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[11px] text-stone-500 sm:text-xs">
             <span>Collector: {apiMeta?.last_collector_run ? new Date(apiMeta.last_collector_run).toLocaleString() : "—"}</span>
             <span>·</span>
             <span>Stories: {apiMeta?.unique_rows ?? filtered.length}</span>
@@ -498,8 +498,8 @@ export default function Home() {
         </div>
 
         {/* Section nav — newspaper-style */}
-        <nav className="border-t border-stone-200 bg-stone-100/80">
-          <div className="mx-auto flex max-w-6xl flex-wrap justify-center gap-1 px-2 py-2 text-xs font-semibold uppercase tracking-wide text-stone-700 sm:gap-4 sm:text-sm">
+        <nav className="border-t border-stone-200 bg-stone-100/90">
+          <div className="mx-auto flex max-w-6xl flex-wrap justify-center gap-0.5 px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-stone-700 sm:gap-2 sm:py-2 sm:text-xs">
             <span className="px-2 py-1 text-stone-500">Sections</span>
             <button
               type="button"
@@ -571,32 +571,32 @@ export default function Home() {
         </nav>
       </header>
 
-      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
-        <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
-          <div className="min-w-0 flex-1 space-y-8">
+      <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
+          <div className="min-w-0 flex-1 space-y-6">
         {/* Dateline stats */}
-        <section className="mb-8 grid gap-px overflow-hidden rounded-sm border border-stone-300 bg-stone-300 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="bg-[var(--paper-card)] p-4">
+        <section className="mb-6 grid gap-px overflow-hidden rounded-sm border border-stone-300 bg-stone-300 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="bg-[var(--paper-card)] p-3 sm:p-3.5">
             <p className="text-[10px] font-bold uppercase tracking-wider text-stone-500">In this edition</p>
-            <p className="font-headline mt-1 text-3xl font-bold text-stone-900">{filtered.length}</p>
+            <p className="font-headline mt-0.5 text-2xl font-bold tabular-nums text-stone-900">{filtered.length}</p>
           </div>
-          <div className="bg-[var(--paper-card)] p-4">
+          <div className="bg-[var(--paper-card)] p-3 sm:p-3.5">
             <p className="text-[10px] font-bold uppercase tracking-wider text-stone-500">Avg signal</p>
-            <p className="font-headline mt-1 text-3xl font-bold text-stone-900">{avgScore}</p>
+            <p className="font-headline mt-0.5 text-2xl font-bold tabular-nums text-stone-900">{avgScore}</p>
           </div>
-          <div className="bg-[var(--paper-card)] p-4">
+          <div className="bg-[var(--paper-card)] p-3 sm:p-3.5">
             <p className="text-[10px] font-bold uppercase tracking-wider text-stone-500">To test</p>
-            <p className="font-headline mt-1 text-3xl font-bold text-stone-900">{testingItems.length}</p>
+            <p className="font-headline mt-0.5 text-2xl font-bold tabular-nums text-stone-900">{testingItems.length}</p>
           </div>
-          <div className="bg-[var(--paper-card)] p-4">
+          <div className="bg-[var(--paper-card)] p-3 sm:p-3.5">
             <p className="text-[10px] font-bold uppercase tracking-wider text-stone-500">To watch</p>
-            <p className="font-headline mt-1 text-3xl font-bold text-stone-900">{watchItems.length}</p>
+            <p className="font-headline mt-0.5 text-2xl font-bold tabular-nums text-stone-900">{watchItems.length}</p>
           </div>
         </section>
 
-        <section className="mb-8 border border-stone-300 bg-[var(--paper-card)] p-4 shadow-sm">
-          <p className="mb-3 text-[10px] font-bold uppercase tracking-wider text-stone-500">
-            Newsroom search & filters
+        <section className="mb-6 border border-stone-300 bg-[var(--paper-card)] p-3 shadow-sm sm:p-4">
+          <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-stone-500">
+            Search & filters
           </p>
           <div className="grid gap-3 md:grid-cols-6">
             <input
@@ -723,14 +723,14 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="mb-8 grid gap-px overflow-hidden border border-stone-300 bg-stone-300 lg:grid-cols-3">
-          <article className="rule-thick relative bg-[var(--paper-card)] p-6 lg:col-span-2">
+        <section className="mb-6 grid gap-px overflow-hidden border border-stone-300 bg-stone-300 lg:grid-cols-3">
+          <article className="rule-thick relative bg-[var(--paper-card)] p-4 sm:p-5 lg:col-span-2">
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--accent)]">
               Lead story
             </p>
             {top ? (
               <>
-                <h2 className="font-headline mt-3 text-3xl font-bold leading-tight tracking-tight text-stone-900">
+                <h2 className="font-headline mt-2 text-2xl font-bold leading-snug tracking-tight text-stone-900 sm:text-[1.65rem] sm:leading-tight">
                   {top.url ? (
                     <a
                       href={top.url}
@@ -749,8 +749,8 @@ export default function Home() {
                   <span className="mx-2 text-stone-300">·</span>
                   {timeAgo(top.published_date)}
                 </p>
-                <p className="mt-4 text-base leading-relaxed text-stone-700">{top.summary}</p>
-                <p className="mt-3 border-l-2 border-[var(--accent)] pl-3 text-sm italic text-stone-600">
+                <p className="mt-3 text-sm leading-relaxed text-stone-700 sm:text-[15px]">{top.summary}</p>
+                <p className="mt-2 border-l-2 border-[var(--accent)] pl-3 text-xs italic leading-relaxed text-stone-600 sm:text-sm">
                   {top.why_it_matters}
                 </p>
                 <div className="mt-4 flex flex-wrap items-center gap-2 text-xs">
@@ -794,17 +794,17 @@ export default function Home() {
             )}
           </article>
 
-          <aside className="bg-[var(--paper-card)] p-5">
-            <h3 className="border-b border-stone-200 pb-2 font-headline text-sm font-bold uppercase tracking-wide text-stone-800">
+          <aside className="bg-[var(--paper-card)] p-4 sm:p-4">
+            <h3 className="border-b border-stone-200 pb-1.5 font-headline text-xs font-bold uppercase tracking-wide text-stone-800">
               Trending
             </h3>
-            <p className="mt-2 text-[10px] font-medium uppercase tracking-wider text-stone-500">
+            <p className="mt-1.5 text-[10px] font-medium uppercase tracking-wider text-stone-500">
               By signal strength
             </p>
-            <div className="mt-4 space-y-0 divide-y divide-stone-200">
+            <div className="mt-3 space-y-0 divide-y divide-stone-200">
               {trendingNow.slice(0, 6).map((item) => (
-                <div key={getItemKey(item)} className="py-3 first:pt-0">
-                  <p className="font-headline text-sm font-semibold leading-snug text-stone-900">
+                <div key={getItemKey(item)} className="py-2.5 first:pt-0">
+                  <p className="text-[13px] font-semibold leading-snug text-stone-900">
                     {item.url ? (
                       <a
                         href={item.url}
@@ -832,7 +832,7 @@ export default function Home() {
         </section>
 
         {isFrontPage ? (
-        <section className="mb-8 grid gap-px overflow-hidden border border-stone-300 bg-stone-300 sm:grid-cols-3">
+        <section className="mb-6 grid gap-px overflow-hidden border border-stone-300 bg-stone-300 sm:grid-cols-3">
           <div className="bg-[var(--paper-card)] p-4">
             <h3 className="text-[10px] font-bold uppercase tracking-wider text-stone-500">Desk · New</h3>
             <p className="font-headline mt-1 text-2xl font-bold text-stone-900">{newItems.length}</p>
@@ -852,10 +852,10 @@ export default function Home() {
         ) : null}
 
         {isFrontPage ? (
-        <section className="mb-8 grid gap-px overflow-hidden border border-stone-300 bg-stone-300 lg:grid-cols-2">
-          <div className="bg-[var(--paper-card)] p-5">
-            <div className="rule-thin mb-3" />
-            <h3 className="font-headline text-xl font-bold text-stone-900">Tools & launches</h3>
+        <section className="mb-6 grid gap-px overflow-hidden border border-stone-300 bg-stone-300 lg:grid-cols-2">
+          <div className="bg-[var(--paper-card)] p-4 sm:p-4">
+            <div className="rule-thin mb-2" />
+            <h3 className="font-headline text-base font-bold text-stone-900 sm:text-lg">Tools & launches</h3>
             <p className="mt-1 text-xs text-stone-500">Product Hunt, GitHub, and shipped tools</p>
             <div className="mt-4 space-y-0 divide-y divide-stone-200">
               {latestTools.map((item) => (
@@ -891,9 +891,9 @@ export default function Home() {
               ))}
             </div>
           </div>
-          <div className="bg-[var(--paper-card)] p-5">
-            <div className="rule-thin mb-3" />
-            <h3 className="font-headline text-xl font-bold text-stone-900">Research papers</h3>
+          <div className="bg-[var(--paper-card)] p-4 sm:p-4">
+            <div className="rule-thin mb-2" />
+            <h3 className="font-headline text-base font-bold text-stone-900 sm:text-lg">Research papers</h3>
             <p className="mt-1 text-xs text-stone-500">arXiv only — open any title for the canonical paper link</p>
             <div className="mt-4 space-y-0 divide-y divide-stone-200">
               {latestArxivPapers.map((item) => (
@@ -932,23 +932,23 @@ export default function Home() {
         </section>
         ) : null}
 
-        <section className="mb-8 border border-stone-300 bg-[var(--paper-card)] p-5 shadow-sm">
-          <h3 className="font-headline text-xl font-bold text-stone-900">{streamSectionTitle}</h3>
+        <section className="mb-6 border border-stone-300 bg-[var(--paper-card)] p-4 shadow-sm sm:p-4">
+          <h3 className="font-headline text-base font-bold text-stone-900 sm:text-lg">{streamSectionTitle}</h3>
           <p className="mt-1 text-xs text-stone-500">
             {isFrontPage
               ? "Highest-ranked items across all sources — each card opens the original URL."
               : "Top items in this feed only — click a headline to open the source."}
           </p>
-          <div className="mt-4 grid gap-px bg-stone-200 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-3 grid gap-px bg-stone-200 sm:grid-cols-2 lg:grid-cols-3">
             {topStories.map((item) => (
               <a
                 key={getItemKey(item)}
                 href={item.url || "#"}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-[var(--paper-card)] p-4 transition hover:bg-stone-50"
+                className="bg-[var(--paper-card)] p-3 transition hover:bg-stone-50 sm:p-3.5"
               >
-                <p className="font-headline text-sm font-semibold leading-snug text-stone-900">{item.title}</p>
+                <p className="text-[13px] font-semibold leading-snug text-stone-900">{item.title}</p>
                 <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] text-stone-500">
                   <span>{item.source}</span>
                   <span>{timeAgo(item.published_date)}</span>
@@ -962,13 +962,13 @@ export default function Home() {
         </section>
 
         {isFrontPage ? (
-        <section className="mb-8 border border-stone-300 bg-[var(--paper-card)] shadow-sm">
-          <div className="border-b border-stone-200 px-5 py-4">
-            <h3 className="font-headline text-lg font-bold text-stone-900">Source desk</h3>
-            <p className="mt-1 text-xs text-stone-500">Volume and average score by feed</p>
+        <section className="mb-6 border border-stone-300 bg-[var(--paper-card)] shadow-sm">
+          <div className="border-b border-stone-200 px-3 py-3 sm:px-4">
+            <h3 className="font-headline text-base font-bold text-stone-900">Source desk</h3>
+            <p className="mt-0.5 text-[11px] text-stone-500 sm:text-xs">Volume and average score by feed</p>
           </div>
-          <div className="border-b border-stone-200 px-5 py-4">
-            <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-stone-500">
+          <div className="border-b border-stone-200 px-3 py-3 sm:px-4">
+            <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-stone-500">
               Score trend · 14 days
             </p>
             {scoreTrend ? (
@@ -985,22 +985,22 @@ export default function Home() {
             )}
           </div>
           <div className="overflow-x-auto">
-            <table className="min-w-full text-sm">
-              <thead className="border-b border-stone-200 bg-stone-100 text-left text-stone-700">
+            <table className="w-full text-xs">
+              <thead className="border-b border-stone-200 bg-stone-50 text-left text-stone-600">
                 <tr>
-                  <th className="px-4 py-3 font-semibold">Source</th>
-                  <th className="px-4 py-3 font-semibold">Items</th>
-                  <th className="px-4 py-3 font-semibold">Avg score</th>
-                  <th className="px-4 py-3 font-semibold">Test rate</th>
+                  <th className="px-3 py-2 font-semibold uppercase tracking-wide">Source</th>
+                  <th className="px-3 py-2 font-semibold uppercase tracking-wide">Items</th>
+                  <th className="px-3 py-2 font-semibold uppercase tracking-wide">Avg</th>
+                  <th className="px-3 py-2 font-semibold uppercase tracking-wide">Test %</th>
                 </tr>
               </thead>
               <tbody>
                 {sourceMetrics.map(([name, metric]) => (
-                  <tr key={name} className="border-t border-stone-200">
-                    <td className="px-4 py-3 font-medium text-stone-800">{name}</td>
-                    <td className="px-4 py-3 text-stone-700">{metric.count}</td>
-                    <td className="px-4 py-3 text-stone-700">{metric.avgScore.toFixed(2)}</td>
-                    <td className="px-4 py-3 text-stone-700">{metric.testRate.toFixed(0)}%</td>
+                  <tr key={name} className="border-t border-stone-100">
+                    <td className="px-3 py-2 font-medium text-stone-800">{name}</td>
+                    <td className="px-3 py-2 tabular-nums text-stone-700">{metric.count}</td>
+                    <td className="px-3 py-2 tabular-nums text-stone-700">{metric.avgScore.toFixed(2)}</td>
+                    <td className="px-3 py-2 tabular-nums text-stone-700">{metric.testRate.toFixed(0)}%</td>
                   </tr>
                 ))}
               </tbody>
@@ -1010,19 +1010,19 @@ export default function Home() {
         ) : null}
 
         <section className="border border-stone-300 bg-[var(--paper-card)] shadow-sm">
-          <div className="border-b border-stone-200 px-5 py-4">
+          <div className="border-b border-stone-200 px-3 py-3 sm:px-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
-                <h3 className="font-headline text-lg font-bold text-stone-900">{archiveSectionTitle}</h3>
-                <p className="mt-1 text-xs text-stone-500">Sort, triage, and open sources</p>
+                <h3 className="font-headline text-base font-bold text-stone-900">{archiveSectionTitle}</h3>
+                <p className="mt-0.5 text-[11px] text-stone-500 sm:text-xs">Sort, triage, and open sources</p>
               </div>
-              <div className="flex items-center gap-2 text-sm">
+              <div className="flex items-center gap-2 text-xs">
                 <label htmlFor="page-size" className="text-stone-500">
-                  Rows per page
+                  Rows
                 </label>
                 <select
                   id="page-size"
-                  className="rounded-sm border border-stone-300 bg-white px-2 py-1 text-sm"
+                  className="rounded-sm border border-stone-300 bg-white px-2 py-1 text-xs"
                   value={pageSize}
                   onChange={(e) => setPageSize(Number(e.target.value))}
                 >
@@ -1035,39 +1035,39 @@ export default function Home() {
           </div>
           <div className="divide-y divide-stone-200">
             {loading ? (
-              <div className="px-6 py-10 text-center text-sm text-stone-500">
+              <div className="px-4 py-8 text-center text-sm text-stone-500">
                 Loading edition from webhook…
               </div>
             ) : error ? (
-              <div className="px-6 py-8">
-                <p className="text-red-700">Could not load data: {error}</p>
+              <div className="px-4 py-6">
+                <p className="text-sm text-red-700">Could not load data: {error}</p>
                 <button
                   onClick={loadItems}
-                  className="mt-3 rounded-sm border border-stone-400 bg-white px-3 py-1.5 text-sm text-stone-800 hover:bg-stone-50"
+                  className="mt-2 rounded-sm border border-stone-400 bg-white px-3 py-1.5 text-xs text-stone-800 hover:bg-stone-50"
                 >
                   Retry
                 </button>
               </div>
             ) : items.length === 0 ? (
-              <div className="px-6 py-8 text-sm text-stone-500">
+              <div className="px-4 py-6 text-sm text-stone-500">
                 No rows returned. Check your n8n run and sheet.
               </div>
             ) : filtered.length === 0 ? (
-              <div className="px-6 py-8">
-                <p className="text-stone-600">Nothing matches these filters.</p>
+              <div className="px-4 py-6">
+                <p className="text-sm text-stone-600">Nothing matches these filters.</p>
                 <button
                   onClick={resetFilters}
-                  className="mt-3 rounded-sm border border-stone-400 bg-white px-3 py-1.5 text-sm text-stone-800 hover:bg-stone-50"
+                  className="mt-2 rounded-sm border border-stone-400 bg-white px-3 py-1.5 text-xs text-stone-800 hover:bg-stone-50"
                 >
                   Reset filters
                 </button>
               </div>
             ) : viewMode === "cards" ? (
               paginated.map((item) => (
-                <article key={item.id || item.url} className="px-5 py-5">
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                      <h4 className="font-headline text-lg font-semibold text-stone-900">
+                <article key={item.id || item.url} className="border-b border-stone-100 px-4 py-3 last:border-b-0 sm:px-4">
+                  <div className="flex flex-wrap items-start justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <h4 className="text-sm font-semibold leading-snug text-stone-900">
                         {item.url ? (
                           <a
                             href={item.url}
@@ -1081,11 +1081,11 @@ export default function Home() {
                           item.title
                         )}
                       </h4>
-                      <p className="mt-1 text-sm text-stone-600 line-clamp-2">{item.summary}</p>
-                      <p className="mt-1 text-sm text-stone-500">{item.why_it_matters}</p>
+                      <p className="mt-1 text-xs text-stone-600 line-clamp-2">{item.summary}</p>
+                      <p className="mt-0.5 text-[11px] leading-snug text-stone-500 line-clamp-2">{item.why_it_matters}</p>
                     </div>
                     <span
-                      className={`rounded-sm border border-stone-200 px-3 py-1 text-sm ${scoreClass(
+                      className={`shrink-0 rounded-sm border border-stone-200 px-2 py-0.5 text-xs ${scoreClass(
                         Number(item.final_score || 0),
                       )}`}
                     >
@@ -1137,80 +1137,94 @@ export default function Home() {
               ))
             ) : (
               <div className="overflow-x-auto">
-                <table className="min-w-full text-sm">
-                  <thead className="sticky top-0 z-10 border-b border-stone-200 bg-stone-100">
-                    <tr className="text-left text-stone-700">
-                      <th className="px-4 py-3 font-semibold">Title</th>
-                      <th className="px-4 py-3 font-semibold">Source</th>
-                      <th className="px-4 py-3 font-semibold">Category</th>
-                      <th className="px-4 py-3 font-semibold">Action</th>
-                      <th className="px-4 py-3 font-semibold">Triage</th>
-                      <th className="px-4 py-3 font-semibold">Score</th>
-                      <th className="px-4 py-3 font-semibold">Published</th>
-                      <th className="px-4 py-3 font-semibold">Open</th>
+                <table className="archive-table w-full min-w-[640px] table-fixed border-collapse text-left text-stone-800">
+                  <thead className="sticky top-0 z-10 border-b border-stone-200 bg-stone-50">
+                    <tr>
+                      <th className="w-[38%] py-2 pl-3 pr-2 text-left">Title</th>
+                      <th className="w-[11%] py-2 px-2 text-left">Source</th>
+                      <th className="w-[12%] py-2 px-2 text-left">Category</th>
+                      <th className="w-[10%] py-2 px-2 text-left">Action</th>
+                      <th className="w-[11%] py-2 px-2 text-left">Triage</th>
+                      <th className="w-[7%] py-2 px-2 text-left">Score</th>
+                      <th className="w-[11%] py-2 px-2 text-left">Published</th>
+                      <th className="w-0 py-2 pr-3 pl-2 text-right">Link</th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody className="divide-y divide-stone-100">
                     {paginated.map((item) => (
-                      <tr key={item.id || item.url} className="border-t border-stone-200 align-top">
-                        <td className="max-w-md px-4 py-3">
-                          <p className="font-headline font-semibold text-stone-900">
+                      <tr key={item.id || item.url} className="align-top hover:bg-stone-50/80">
+                        <td className="min-w-0 py-2 pl-3 pr-2">
+                          <div className="min-w-0">
                             {item.url ? (
                               <a
                                 href={item.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-stone-900 underline-offset-2 hover:text-[var(--accent)] hover:underline"
+                                className="line-clamp-2 font-medium text-stone-900 underline-offset-2 hover:text-[var(--accent)] hover:underline"
                               >
                                 {item.title}
                               </a>
                             ) : (
-                              item.title
+                              <span className="line-clamp-2 font-medium text-stone-900">{item.title}</span>
                             )}
-                          </p>
-                          <p className="mt-1 line-clamp-2 text-xs text-stone-500">{item.summary}</p>
+                            {item.summary ? (
+                              <p className="mt-0.5 line-clamp-1 text-[11px] leading-snug text-stone-500">{item.summary}</p>
+                            ) : null}
+                          </div>
                         </td>
-                        <td className="px-4 py-3 text-stone-700">{item.source}</td>
-                        <td className="px-4 py-3">
-                          <span className="rounded-sm border border-stone-200 bg-stone-50 px-2 py-1 text-xs text-stone-800">
-                            {item.category || "unknown"}
+                        <td className="py-2 px-2 text-[11px] text-stone-600">{item.source}</td>
+                        <td className="py-2 px-2">
+                          <span className="inline-block max-w-full truncate rounded border border-stone-200 bg-stone-50 px-1.5 py-0.5 text-[11px] text-stone-800">
+                            {item.category || "—"}
                           </span>
                         </td>
-                        <td className="px-4 py-3">
-                          <span className={`rounded-sm border border-stone-200 px-2 py-1 text-xs ${badgeClass(item.recommended_action)}`}>
+                        <td className="py-2 px-2">
+                          <span
+                            className={`inline-block max-w-full truncate rounded border border-stone-200 px-1.5 py-0.5 text-[11px] ${badgeClass(item.recommended_action)}`}
+                          >
                             {item.recommended_action}
                           </span>
                         </td>
-                        <td className="px-4 py-3">
+                        <td className="py-2 px-2">
                           <select
-                            className="rounded-sm border border-stone-300 bg-white px-2 py-1 text-xs"
+                            className="w-full max-w-[5.5rem] rounded border border-stone-300 bg-white py-0.5 pl-1 pr-0 text-[11px] leading-tight"
                             value={triageMap[getItemKey(item)] || "new"}
                             onChange={(e) => setTriage(item, e.target.value as TriageStatus)}
                           >
                             <option value="new">new</option>
-                            <option value="testing">testing</option>
+                            <option value="testing">test</option>
                             <option value="watch">watch</option>
-                            <option value="adopted">adopted</option>
-                            <option value="ignored">ignored</option>
+                            <option value="adopted">done</option>
+                            <option value="ignored">skip</option>
                           </select>
                         </td>
-                        <td className="px-4 py-3">
-                          <span className={`rounded-sm border border-stone-200 px-2 py-1 text-xs ${scoreClass(Number(item.final_score || 0))}`}>
+                        <td className="py-2 px-2">
+                          <span
+                            className={`inline-block rounded border border-stone-200 px-1.5 py-0.5 text-[11px] tabular-nums ${scoreClass(Number(item.final_score || 0))}`}
+                          >
                             {item.final_score}
                           </span>
                         </td>
-                        <td className="whitespace-nowrap px-4 py-3 text-stone-500">
-                          {item.published_date}
+                        <td className="py-2 px-2 text-[11px] tabular-nums text-stone-500">
+                          <span className="block truncate" title={item.published_date}>
+                            {item.published_date
+                              ? String(item.published_date).slice(0, 10)
+                              : "—"}
+                          </span>
                         </td>
-                        <td className="px-4 py-3">
-                          <a
-                            href={item.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="font-medium text-[var(--accent)] underline-offset-2 hover:underline"
-                          >
-                            Open
-                          </a>
+                        <td className="py-2 pr-3 pl-2 text-right">
+                          {item.url ? (
+                            <a
+                              href={item.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[11px] font-medium text-[var(--accent)] underline-offset-2 hover:underline"
+                            >
+                              Open
+                            </a>
+                          ) : (
+                            <span className="text-[11px] text-stone-400">—</span>
+                          )}
                         </td>
                       </tr>
                     ))}
@@ -1220,25 +1234,25 @@ export default function Home() {
             )}
           </div>
           {filtered.length > 0 ? (
-            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-stone-200 bg-stone-50 px-5 py-4 text-sm">
-              <p className="text-stone-600">
-                Showing {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, filtered.length)} of {filtered.length}
+            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-stone-200 bg-stone-50 px-3 py-2.5 text-xs sm:px-4">
+              <p className="tabular-nums text-stone-600">
+                {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, filtered.length)} of {filtered.length}
               </p>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <button
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={page === 1}
-                  className="rounded-sm border border-stone-400 bg-white px-3 py-1.5 text-stone-800 hover:bg-stone-100 disabled:opacity-40"
+                  className="rounded-sm border border-stone-300 bg-white px-2.5 py-1 text-xs text-stone-800 hover:bg-stone-100 disabled:opacity-40"
                 >
-                  Previous
+                  Prev
                 </button>
-                <span className="text-stone-700">
-                  Page {page} of {totalPages}
+                <span className="px-1 tabular-nums text-stone-600">
+                  {page}/{totalPages}
                 </span>
                 <button
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                   disabled={page === totalPages}
-                  className="rounded-sm border border-stone-400 bg-white px-3 py-1.5 text-stone-800 hover:bg-stone-100 disabled:opacity-40"
+                  className="rounded-sm border border-stone-300 bg-white px-2.5 py-1 text-xs text-stone-800 hover:bg-stone-100 disabled:opacity-40"
                 >
                   Next
                 </button>
@@ -1249,15 +1263,15 @@ export default function Home() {
 
           </div>
 
-          <aside className="w-full shrink-0 border-t border-stone-200 pt-6 lg:sticky lg:top-4 lg:w-72 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
+          <aside className="w-full shrink-0 border-t border-stone-200 pt-5 lg:sticky lg:top-3 lg:w-[17rem] lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
             <div className="border border-stone-300 bg-[var(--paper-card)] shadow-sm">
               <div className="border-b border-stone-200 bg-[var(--accent-soft)] px-3 py-2">
                 <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--accent)]">Wire</p>
-                <p className="mt-0.5 text-[11px] text-stone-600">
-                  Latest across all feeds — click any line for the original source
+                <p className="mt-0.5 text-[11px] leading-snug text-stone-600">
+                  Latest across feeds — each line opens the original source
                 </p>
               </div>
-              <div className="max-h-[min(70vh,520px)] divide-y divide-stone-200 overflow-y-auto overscroll-contain text-sm">
+              <div className="max-h-[min(62vh,440px)] divide-y divide-stone-200 overflow-y-auto overscroll-contain text-xs">
                 {wireItems.length === 0 ? (
                   <p className="p-3 text-xs text-stone-500">No linked items yet.</p>
                 ) : (
@@ -1267,15 +1281,15 @@ export default function Home() {
                       href={item.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="block px-3 py-2.5 transition hover:bg-stone-50"
+                      className="block px-2.5 py-2 transition hover:bg-stone-50"
                     >
                       <span className="text-[10px] font-semibold uppercase tracking-wide text-stone-500">
                         {item.source}
                       </span>
-                      <span className="mt-0.5 line-clamp-3 block font-medium leading-snug text-stone-900">
+                      <span className="mt-0.5 line-clamp-2 block text-[12px] font-medium leading-snug text-stone-900">
                         {item.title}
                       </span>
-                      <span className="mt-1 block text-[10px] text-stone-500">{timeAgo(item.published_date)}</span>
+                      <span className="mt-0.5 block text-[10px] text-stone-500">{timeAgo(item.published_date)}</span>
                     </a>
                   ))
                 )}
@@ -1284,8 +1298,8 @@ export default function Home() {
           </aside>
         </div>
 
-        <footer className="mt-10 border-t border-stone-300 pt-6 text-center text-xs text-stone-500">
-          <p className="font-headline text-stone-600">AI Tool Radar</p>
+        <footer className="mt-8 border-t border-stone-300 pt-5 text-center text-[11px] text-stone-500 sm:text-xs">
+          <p className="font-headline text-sm text-stone-700">AI Tool Radar</p>
           <p className="mt-1">
             Signals from Hacker News, Product Hunt, GitHub, and arXiv — ranked for your lab.
           </p>
