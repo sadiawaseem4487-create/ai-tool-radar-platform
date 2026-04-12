@@ -1136,18 +1136,18 @@ export default function Home() {
                 </article>
               ))
             ) : (
-              <div className="overflow-x-auto">
-                <table className="archive-table w-full min-w-[640px] table-fixed border-collapse text-left text-stone-800">
+              <div className="min-w-0 w-full">
+                <table className="archive-table w-full table-fixed border-collapse text-left text-stone-800">
                   <thead className="sticky top-0 z-10 border-b border-stone-200 bg-stone-50">
                     <tr>
-                      <th className="w-[38%] py-2 pl-3 pr-2 text-left">Title</th>
-                      <th className="w-[11%] py-2 px-2 text-left">Source</th>
-                      <th className="w-[12%] py-2 px-2 text-left">Category</th>
-                      <th className="w-[10%] py-2 px-2 text-left">Action</th>
-                      <th className="w-[11%] py-2 px-2 text-left">Triage</th>
-                      <th className="w-[7%] py-2 px-2 text-left">Score</th>
-                      <th className="w-[11%] py-2 px-2 text-left">Published</th>
-                      <th className="w-0 py-2 pr-3 pl-2 text-right">Link</th>
+                      <th className="w-[30%] py-2 pl-3 pr-2 text-left">Title</th>
+                      <th className="w-[10%] py-2 px-2 text-left">Source</th>
+                      <th className="w-[10%] py-2 px-2 text-left">Category</th>
+                      <th className="w-[9%] py-2 px-2 text-left">Action</th>
+                      <th className="w-[10%] py-2 px-2 text-left">Triage</th>
+                      <th className="w-[6%] py-2 px-2 text-left">Score</th>
+                      <th className="w-[10%] py-2 px-2 text-left">Published</th>
+                      <th className="w-[15%] whitespace-nowrap py-2 pr-3 pl-2 text-right">Link</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-stone-100">
@@ -1212,7 +1212,7 @@ export default function Home() {
                               : "—"}
                           </span>
                         </td>
-                        <td className="py-2 pr-3 pl-2 text-right">
+                        <td className="whitespace-nowrap py-2 pr-3 pl-2 text-right">
                           {item.url ? (
                             <a
                               href={item.url}
