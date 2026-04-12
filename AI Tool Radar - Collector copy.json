@@ -937,14 +937,14 @@
     },
     "Split sheet writes": {
       "main": [
+        [],
         [
           {
             "node": "Wait sheet pacing",
             "type": "main",
             "index": 0
           }
-        ],
-        []
+        ]
       ]
     },
     "Wait sheet pacing": {
