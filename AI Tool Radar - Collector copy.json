@@ -311,6 +311,10 @@
       ],
       "id": "adea95db-29ce-4065-b68a-e873047b94ab",
       "name": "Append row in sheet",
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 10000,
+      "alwaysOutputData": true,
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "8wbckJeo4S8rs7CL",
@@ -395,6 +399,35 @@
       ],
       "id": "8f54df17-632d-4e99-af8b-f216f4e3bcb2",
       "name": "code"
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1688,
+        -352
+      ],
+      "id": "c8d1e2f3-4a5b-6c7d-8e9f-0a1b2c3d4e5f",
+      "name": "Split sheet writes"
+    },
+    {
+      "parameters": {
+        "resume": "timeInterval",
+        "amount": 2,
+        "unit": "seconds"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1724,
+        -352
+      ],
+      "id": "d9e0f1a2-b3c4-5d6e-7f8a-9b0c1d2e3f4a",
+      "name": "Wait sheet pacing"
     },
     {
       "parameters": {
@@ -895,6 +928,29 @@
       "main": [
         [
           {
+            "node": "Split sheet writes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split sheet writes": {
+      "main": [
+        [
+          {
+            "node": "Wait sheet pacing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Wait sheet pacing": {
+      "main": [
+        [
+          {
             "node": "Append row in sheet",
             "type": "main",
             "index": 0
@@ -1094,6 +1150,17 @@
         [
           {
             "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Split sheet writes",
             "type": "main",
             "index": 0
           }
