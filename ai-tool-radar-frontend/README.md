@@ -96,6 +96,16 @@ Deploy on Vercel and add the same environment variable there:
   - release smoke checks available via `npm run verify:release`
   - release and rollback runbook documented in `docs/release-runbook.md`
 
+## Phase 2 scale readiness (excluding billing)
+
+- Phase 2 tracker: `PHASE2.md`
+- Added job queue and background worker tooling:
+  - enqueue warm jobs with `POST /api/v1/admin/tools/warm?async=true`
+  - run worker with `npm run worker:jobs`
+- Added migration runner: `npm run db:migrate`
+- Added CI/e2e seed helper: `npm run db:seed:e2e`
+- Added outbound alert webhook support via `RADAR_ALERT_WEBHOOK_URL`
+
 ## Admin overview (optional auth)
 
 When `RADAR_REQUIRE_AUTH=true`, admins can open `/admin` for KPIs backed by `GET /api/v1/admin/stats` (audit + triage aggregates).

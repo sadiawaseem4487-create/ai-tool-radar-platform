@@ -217,6 +217,12 @@ paths:
     post:
       summary: Warm tools cache from upstream
       tags: [Admin Tools]
+      parameters:
+        - name: async
+          in: query
+          schema:
+            type: boolean
+          description: Queue the warm job for background processing when true.
       responses:
         "200":
           description: Tools cache warmed
@@ -238,6 +244,8 @@ paths:
                     type: string
                   correlation_id:
                     type: string
+        "202":
+          description: Warm job accepted and queued
   /api/v1/admin/metrics:
     get:
       summary: Runtime and database metrics for current tenant context

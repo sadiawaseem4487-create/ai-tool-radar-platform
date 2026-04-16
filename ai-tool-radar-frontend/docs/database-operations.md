@@ -17,7 +17,7 @@ This document defines migration, backup, restore, and retention practices for AI
 ### Apply a migration manually
 
 ```bash
-psql "$DATABASE_URL" -f db/migrations/0001_reliability_indexes.sql
+npm run db:migrate
 ```
 
 ## Backup policy

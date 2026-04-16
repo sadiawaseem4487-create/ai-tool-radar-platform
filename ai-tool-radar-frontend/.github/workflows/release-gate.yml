@@ -29,3 +29,62 @@ jobs:
 
       - name: Build
         run: npm run build
+
+  e2e:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: radar
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d radar"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/radar
+      DATABASE_SSL: "false"
+      RADAR_REQUIRE_AUTH: "true"
+      RADAR_UPSTREAM_URL: https://example.com/radar-upstream-placeholder
+      RADAR_SESSION_SECRET: test_session_secret_for_ci_only
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run DB migrations
+        run: npm run db:migrate
+
+      - name: Seed DB for smoke tests
+        run: npm run db:seed:e2e
+
+      - name: Start app
+        run: npm run dev > /tmp/radar-dev.log 2>&1 &
+
+      - name: Wait for app
+        run: |
+          for i in {1..60}; do
+            if curl -fsS http://127.0.0.1:3000/api/v1/ready > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "App did not become ready in time"
+          cat /tmp/radar-dev.log || true
+          exit 1
+
+      - name: Release smoke checks
+        run: npm run verify:release

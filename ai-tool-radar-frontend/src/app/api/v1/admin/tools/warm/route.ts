@@ -12,6 +12,8 @@ import {
   recordApiOutcome,
   recordJobOutcome,
 } from "@/lib/observability/ops";
+import { sendAlertNotification } from "@/lib/observability/alert-delivery";
+import { enqueueJob } from "@/lib/admin/job-queue";
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +22,11 @@ export async function POST(req: NextRequest) {
   const correlationId = correlationIdFrom(req, rid);
   const route = "/api/v1/admin/tools/warm";
   const method = "POST";
+  const url = new URL(req.url);
+  const queueMode =
+    url.searchParams.get("async") === "true" ||
+    url.searchParams.get("queue") === "true" ||
+    process.env.RADAR_WARM_USE_QUEUE === "true";
   const auth = requireAuth(req, rid, "ingest.write");
   if (!auth.ok) return auth.response;
   const rate = checkRateLimit({
@@ -57,6 +64,35 @@ export async function POST(req: NextRequest) {
         },
       },
     );
+  }
+  if (queueMode) {
+    const queued = await enqueueJob({
+      tenant_id: auth.session.tenant_id,
+      job_type: "tools.warm",
+      payload: {
+        triggered_by: auth.session.user_id,
+        request_id: rid,
+        correlation_id: correlationId,
+      },
+    });
+    if (queued) {
+      await writeAudit({
+        tenant_id: auth.session.tenant_id,
+        actor_id: auth.session.user_id,
+        action: "job.queue.enqueue",
+        entity: "job_queue",
+        entity_id: queued.id,
+        metadata: { job_type: queued.job_type, status: queued.status },
+      });
+      return NextResponse.json(
+        {
+          data: { ok: true, queued: true, queue_id: queued.id, status: queued.status },
+          request_id: rid,
+          correlation_id: correlationId,
+        },
+        { status: 202, headers: { "X-Request-Id": rid, "X-Correlation-Id": correlationId } },
+      );
+    }
   }
   const startedAt = new Date().toISOString();
   const startedMs = Date.now();
@@ -169,6 +205,12 @@ export async function POST(req: NextRequest) {
         entity_id: "tools.warm",
         metadata: jobAlert,
       });
+      await sendAlertNotification({
+        alert: jobAlert,
+        tenant_id: auth.session.tenant_id,
+        request_id: rid,
+        correlation_id: correlationId,
+      });
     }
     const apiAlert = recordApiOutcome({
       route,
@@ -187,6 +229,12 @@ export async function POST(req: NextRequest) {
         entity: "api",
         entity_id: route,
         metadata: apiAlert,
+      });
+      await sendAlertNotification({
+        alert: apiAlert,
+        tenant_id: auth.session.tenant_id,
+        request_id: rid,
+        correlation_id: correlationId,
       });
     }
     logRequestEvent({

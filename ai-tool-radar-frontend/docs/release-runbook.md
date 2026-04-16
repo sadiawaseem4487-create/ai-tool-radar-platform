@@ -26,7 +26,7 @@ Before any production release:
    - `RADAR_UPSTREAM_URL` or `NEXT_PUBLIC_RADAR_API_URL`
    - auth/session settings for production
 2. Apply pending DB migrations:
-   - `psql "$DATABASE_URL" -f db/migrations/0001_reliability_indexes.sql`
+   - `npm run db:migrate`
 3. Deploy the new application version.
 4. Run post-deploy smoke checks:
    - `npm run verify:release`
