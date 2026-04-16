@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 type RadarItem = {
@@ -16,6 +17,10 @@ type RadarItem = {
   final_score: number;
   recommended_action: string;
   why_it_matters: string;
+  lifecycle_status?: "hot" | "recent" | "discontinued" | "stable";
+  is_recent?: boolean;
+  is_hot?: boolean;
+  is_discontinued?: boolean;
 };
 
 type RadarApiPayload = {
@@ -27,10 +32,22 @@ type RadarApiPayload = {
     duplicate_rows_removed?: number;
     upsert_key?: string;
     last_collector_run?: string;
+    page?: number;
+    pageSize?: number;
+    total?: number;
+    totalPages?: number;
+    [key: string]: unknown;
   };
 };
 
 type TriageStatus = "new" | "testing" | "watch" | "adopted" | "ignored";
+type ToolComment = {
+  id: string;
+  actor_id: string;
+  author_email?: string;
+  body: string;
+  created_at: string;
+};
 
 function scoreClass(score: number) {
   if (score >= 7) return "bg-green-100 text-green-800";
@@ -46,25 +63,29 @@ function badgeClass(action: string) {
   return "bg-slate-100 text-slate-700";
 }
 
-async function getRadarItems(): Promise<RadarApiPayload> {
-  const url = process.env.NEXT_PUBLIC_RADAR_API_URL;
-  if (!url) {
-    throw new Error("Missing NEXT_PUBLIC_RADAR_API_URL in .env.local");
-  }
+function lifecycleBadgeClass(status?: string) {
+  if (status === "hot") return "bg-rose-100 text-rose-800";
+  if (status === "recent") return "bg-sky-100 text-sky-800";
+  if (status === "discontinued") return "bg-stone-200 text-stone-700";
+  return "bg-slate-100 text-slate-700";
+}
 
-  const response = await fetch(url);
+async function getRadarItems(): Promise<RadarApiPayload> {
+  const response = await fetch("/api/v1/tools?page=1&pageSize=1000", {
+    cache: "no-store",
+  });
   if (!response.ok) {
-    throw new Error(`Webhook request failed with status ${response.status}`);
+    const body = (await response.json().catch(() => null)) as
+      | { error?: { message?: string } }
+      | null;
+    throw new Error(body?.error?.message || `Tools API request failed with status ${response.status}`);
   }
 
   const data = await response.json();
-  if (Array.isArray(data)) {
-    return { data };
-  }
   if (Array.isArray(data?.data)) {
     return data as RadarApiPayload;
   }
-  throw new Error("Webhook response shape is invalid");
+  throw new Error("Tools API response shape is invalid");
 }
 
 function getItemKey(item: RadarItem) {
@@ -107,6 +128,11 @@ export default function Home() {
   const [pageSize, setPageSize] = useState(10);
   const [lastSeenAt, setLastSeenAt] = useState(0);
   const [triageMap, setTriageMap] = useState<Record<string, TriageStatus>>({});
+  const [commentToolKey, setCommentToolKey] = useState("");
+  const [comments, setComments] = useState<ToolComment[]>([]);
+  const [commentsLoading, setCommentsLoading] = useState(false);
+  const [commentDraft, setCommentDraft] = useState("");
+  const [commentStatus, setCommentStatus] = useState("");
 
   const loadItems = async () => {
     try {
@@ -206,6 +232,12 @@ export default function Home() {
         return haystack.includes(text);
       })
       .sort((a, b) => {
+        const aDown = a.is_discontinued ? 1 : 0;
+        const bDown = b.is_discontinued ? 1 : 0;
+        if (aDown !== bDown) return aDown - bDown;
+        const aBoost = a.is_hot ? 2 : a.is_recent ? 1 : 0;
+        const bBoost = b.is_hot ? 2 : b.is_recent ? 1 : 0;
+        if (aBoost !== bBoost) return bBoost - aBoost;
         if (sortBy === "latest") {
           return (
             new Date(b.published_date || 0).getTime() -
@@ -234,6 +266,79 @@ export default function Home() {
 
   const setTriage = (item: RadarItem, status: TriageStatus) => {
     setTriageMap((prev) => ({ ...prev, [getItemKey(item)]: status }));
+  };
+
+  const openComments = async (item: RadarItem) => {
+    const key = getItemKey(item);
+    if (!key) return;
+    setCommentToolKey(key);
+    setCommentsLoading(true);
+    setCommentStatus("");
+    try {
+      const res = await fetch(`/api/v1/tools/${encodeURIComponent(key)}/comments`, { cache: "no-store" });
+      const body = (await res.json()) as {
+        data?: { comments?: ToolComment[] };
+        error?: { message?: string };
+      };
+      if (!res.ok) {
+        setCommentStatus(body.error?.message || `Failed to load comments (HTTP ${res.status})`);
+        setComments([]);
+        return;
+      }
+      setComments(body.data?.comments || []);
+    } catch (err) {
+      setCommentStatus(err instanceof Error ? err.message : "Failed to load comments.");
+      setComments([]);
+    } finally {
+      setCommentsLoading(false);
+    }
+  };
+
+  const addComment = async () => {
+    if (!commentToolKey) return;
+    const body = commentDraft.trim();
+    if (!body) {
+      setCommentStatus("Comment is required.");
+      return;
+    }
+    setCommentStatus("");
+    try {
+      const res = await fetch(`/api/v1/tools/${encodeURIComponent(commentToolKey)}/comments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ body }),
+      });
+      const payload = (await res.json()) as { error?: { message?: string } };
+      if (!res.ok) {
+        setCommentStatus(payload.error?.message || `Failed to add comment (HTTP ${res.status})`);
+        return;
+      }
+      setCommentDraft("");
+      await openComments({ id: commentToolKey } as RadarItem);
+      setCommentStatus("Comment added.");
+    } catch (err) {
+      setCommentStatus(err instanceof Error ? err.message : "Failed to add comment.");
+    }
+  };
+
+  const removeComment = async (commentId: string) => {
+    if (!commentToolKey) return;
+    setCommentStatus("");
+    try {
+      const res = await fetch(
+        `/api/v1/tools/${encodeURIComponent(commentToolKey)}/comments/${encodeURIComponent(commentId)}`,
+        { method: "DELETE" },
+      );
+      const payload = (await res.json()) as { error?: { message?: string } };
+      if (!res.ok) {
+        setCommentStatus(payload.error?.message || `Failed to delete comment (HTTP ${res.status})`);
+        return;
+      }
+      await openComments({ id: commentToolKey } as RadarItem);
+      setCommentStatus("Comment deleted.");
+    } catch (err) {
+      setCommentStatus(err instanceof Error ? err.message : "Failed to delete comment.");
+    }
   };
 
   const resetFilters = () => {
@@ -468,6 +573,12 @@ export default function Home() {
           >
             Refresh edition
           </button>
+          <Link
+            href="/admin"
+            className="rounded border border-stone-600 bg-stone-800 px-2 py-0.5 text-stone-100 hover:bg-stone-700"
+          >
+            Admin
+          </Link>
         </div>
       </div>
 
@@ -763,6 +874,13 @@ export default function Home() {
                   <span className={`rounded-sm border border-stone-200 px-2 py-0.5 ${badgeClass(top.recommended_action)}`}>
                     {top.recommended_action}
                   </span>
+                  {top.lifecycle_status ? (
+                    <span
+                      className={`rounded-sm border border-stone-200 px-2 py-0.5 ${lifecycleBadgeClass(top.lifecycle_status)}`}
+                    >
+                      {top.lifecycle_status}
+                    </span>
+                  ) : null}
                 </div>
                 <div className="mt-5 flex flex-wrap gap-2">
                   {top.url ? (
@@ -886,6 +1004,11 @@ export default function Home() {
                     <span className={`rounded-sm px-1.5 py-0.5 ${badgeClass(item.recommended_action)}`}>
                       {item.recommended_action}
                     </span>
+                    {item.lifecycle_status ? (
+                      <span className={`rounded-sm px-1.5 py-0.5 ${lifecycleBadgeClass(item.lifecycle_status)}`}>
+                        {item.lifecycle_status}
+                      </span>
+                    ) : null}
                   </div>
                 </article>
               ))}
@@ -924,6 +1047,11 @@ export default function Home() {
                     <span className={`rounded-sm px-1.5 py-0.5 ${badgeClass(item.recommended_action)}`}>
                       {item.recommended_action}
                     </span>
+                    {item.lifecycle_status ? (
+                      <span className={`rounded-sm px-1.5 py-0.5 ${lifecycleBadgeClass(item.lifecycle_status)}`}>
+                        {item.lifecycle_status}
+                      </span>
+                    ) : null}
                   </div>
                 </article>
               ))}
@@ -1036,7 +1164,7 @@ export default function Home() {
           <div className="divide-y divide-stone-200">
             {loading ? (
               <div className="px-4 py-8 text-center text-sm text-stone-500">
-                Loading edition from webhook…
+                Loading edition from API feed…
               </div>
             ) : error ? (
               <div className="px-4 py-6">
@@ -1099,6 +1227,13 @@ export default function Home() {
                     <span className={`rounded-sm border border-stone-200 px-2 py-1 ${badgeClass(item.recommended_action)}`}>
                       {item.recommended_action}
                     </span>
+                    {item.lifecycle_status ? (
+                      <span
+                        className={`rounded-sm border border-stone-200 px-2 py-1 ${lifecycleBadgeClass(item.lifecycle_status)}`}
+                      >
+                        {item.lifecycle_status}
+                      </span>
+                    ) : null}
                     {triageMap[getItemKey(item)] ? (
                       <span className={`rounded-sm border border-stone-200 px-2 py-1 ${badgeClass(triageMap[getItemKey(item)])}`}>
                         {triageMap[getItemKey(item)]}
@@ -1131,6 +1266,12 @@ export default function Home() {
                       className="rounded-sm border border-stone-300 bg-stone-100 px-2.5 py-1 text-xs font-medium text-stone-800"
                     >
                       Ignore
+                    </button>
+                    <button
+                      onClick={() => openComments(item)}
+                      className="rounded-sm border border-stone-300 bg-white px-2.5 py-1 text-xs font-medium text-stone-800"
+                    >
+                      Comments
                     </button>
                   </div>
                 </article>
@@ -1184,6 +1325,13 @@ export default function Home() {
                           >
                             {item.recommended_action}
                           </span>
+                          {item.lifecycle_status ? (
+                            <span
+                              className={`ml-1 inline-block max-w-full truncate rounded border border-stone-200 px-1.5 py-0.5 text-[11px] ${lifecycleBadgeClass(item.lifecycle_status)}`}
+                            >
+                              {item.lifecycle_status}
+                            </span>
+                          ) : null}
                         </td>
                         <td className="py-2 px-2">
                           <select
@@ -1213,18 +1361,26 @@ export default function Home() {
                           </span>
                         </td>
                         <td className="whitespace-nowrap py-2 pr-3 pl-2 text-right">
-                          {item.url ? (
-                            <a
-                              href={item.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-[11px] font-medium text-[var(--accent)] underline-offset-2 hover:underline"
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              onClick={() => openComments(item)}
+                              className="text-[11px] font-medium text-stone-700 underline-offset-2 hover:underline"
                             >
-                              Open
-                            </a>
-                          ) : (
-                            <span className="text-[11px] text-stone-400">—</span>
-                          )}
+                              Comments
+                            </button>
+                            {item.url ? (
+                              <a
+                                href={item.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-[11px] font-medium text-[var(--accent)] underline-offset-2 hover:underline"
+                              >
+                                Open
+                              </a>
+                            ) : (
+                              <span className="text-[11px] text-stone-400">—</span>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -1260,6 +1416,70 @@ export default function Home() {
             </div>
           ) : null}
         </section>
+
+        {commentToolKey ? (
+          <section className="mt-4 border border-stone-300 bg-[var(--paper-card)] shadow-sm">
+            <div className="border-b border-stone-200 px-3 py-3 sm:px-4">
+              <div className="flex items-center justify-between gap-2">
+                <div>
+                  <h3 className="font-headline text-base font-bold text-stone-900">Partner comments</h3>
+                  <p className="mt-0.5 text-[11px] text-stone-500">Tool key: {commentToolKey}</p>
+                </div>
+                <button
+                  onClick={() => {
+                    setCommentToolKey("");
+                    setComments([]);
+                    setCommentDraft("");
+                    setCommentStatus("");
+                  }}
+                  className="rounded-sm border border-stone-300 bg-white px-2 py-1 text-xs text-stone-700"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+            <div className="px-3 py-3 sm:px-4">
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <input
+                  value={commentDraft}
+                  onChange={(e) => setCommentDraft(e.target.value)}
+                  placeholder="Add partner comment..."
+                  className="flex-1 rounded-sm border border-stone-300 bg-white px-3 py-2 text-sm"
+                />
+                <button
+                  onClick={addComment}
+                  className="rounded-sm border border-stone-900 bg-stone-900 px-3 py-2 text-xs font-medium text-white"
+                >
+                  Add comment
+                </button>
+              </div>
+              {commentStatus ? <p className="mt-2 text-xs text-stone-600">{commentStatus}</p> : null}
+              {commentsLoading ? <p className="mt-3 text-sm text-stone-500">Loading comments...</p> : null}
+              {!commentsLoading ? (
+                <div className="mt-3 divide-y divide-stone-200">
+                  {comments.map((c) => (
+                    <div key={c.id} className="py-2">
+                      <div className="flex items-center justify-between gap-2 text-[11px] text-stone-500">
+                        <span>{c.author_email || c.actor_id}</span>
+                        <span>{new Date(c.created_at).toLocaleString()}</span>
+                      </div>
+                      <p className="mt-1 text-sm text-stone-800">{c.body}</p>
+                      <button
+                        onClick={() => removeComment(c.id)}
+                        className="mt-1 text-[11px] font-medium text-red-700 underline-offset-2 hover:underline"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  ))}
+                  {comments.length === 0 ? (
+                    <p className="py-2 text-sm text-stone-500">No comments yet for this tool.</p>
+                  ) : null}
+                </div>
+              ) : null}
+            </div>
+          </section>
+        ) : null}
 
           </div>
 

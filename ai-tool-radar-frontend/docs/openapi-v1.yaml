@@ -1,0 +1,340 @@
+openapi: 3.0.3
+info:
+  title: AI Tool Radar API v1
+  version: 1.0.0
+  description: Versioned API surface for AI Tool Radar admin and tool workflows.
+servers:
+  - url: /
+paths:
+  /api/v1/tools:
+    get:
+      summary: List tools with filters
+      tags: [Tools]
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+        - name: source
+          in: query
+          schema:
+            type: string
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: recommended_action
+          in: query
+          schema:
+            type: string
+        - name: q
+          in: query
+          schema:
+            type: string
+        - name: minScore
+          in: query
+          schema:
+            type: number
+        - name: dateFrom
+          in: query
+          schema:
+            type: string
+        - name: dateTo
+          in: query
+          schema:
+            type: string
+        - name: value_stream
+          in: query
+          schema:
+            type: string
+        - name: work_phase
+          in: query
+          schema:
+            type: string
+        - name: tool_type
+          in: query
+          schema:
+            type: string
+        - name: service_model
+          in: query
+          schema:
+            type: string
+        - name: pricing_model
+          in: query
+          schema:
+            type: string
+        - name: integrability
+          in: query
+          schema:
+            type: string
+        - name: compliance
+          in: query
+          schema:
+            type: string
+        - name: validation_level
+          in: query
+          schema:
+            type: string
+        - name: target_use
+          in: query
+          schema:
+            type: string
+        - name: explainability
+          in: query
+          schema:
+            type: string
+        - name: language
+          in: query
+          schema:
+            type: string
+        - name: tool_maturity
+          in: query
+          schema:
+            type: string
+        - name: vendor_maturity
+          in: query
+          schema:
+            type: string
+        - name: partner_commented
+          in: query
+          schema:
+            type: boolean
+        - name: lifecycle
+          in: query
+          schema:
+            type: string
+        - name: recent
+          in: query
+          schema:
+            type: boolean
+        - name: hot
+          in: query
+          schema:
+            type: boolean
+        - name: discontinued
+          in: query
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: Tools list
+  /api/v1/admin/members:
+    get:
+      summary: List members for the current tenant
+      tags: [Admin Members]
+      responses:
+        "200":
+          description: Tenant members
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      tenant_id:
+                        type: string
+                      members:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Member"
+                  request_id:
+                    type: string
+    post:
+      summary: Invite member to current tenant
+      tags: [Admin Members]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, role]
+              properties:
+                email:
+                  type: string
+                  format: email
+                role:
+                  $ref: "#/components/schemas/Role"
+                password:
+                  type: string
+      responses:
+        "200":
+          description: Member invited
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      member:
+                        $ref: "#/components/schemas/Member"
+                  request_id:
+                    type: string
+  /api/v1/admin/members/{id}:
+    patch:
+      summary: Update member role
+      tags: [Admin Members]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [role]
+              properties:
+                role:
+                  $ref: "#/components/schemas/Role"
+      responses:
+        "200":
+          description: Member updated
+    delete:
+      summary: Remove member from current tenant
+      tags: [Admin Members]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Member removed
+  /api/v1/admin/tools/warm:
+    post:
+      summary: Warm tools cache from upstream
+      tags: [Admin Tools]
+      responses:
+        "200":
+          description: Tools cache warmed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      ok:
+                        type: boolean
+                      inserted:
+                        type: integer
+                      postgres_enabled:
+                        type: boolean
+                  request_id:
+                    type: string
+                  correlation_id:
+                    type: string
+  /api/v1/admin/metrics:
+    get:
+      summary: Runtime and database metrics for current tenant context
+      tags: [Admin Observability]
+      responses:
+        "200":
+          description: Metrics snapshot
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      uptime_seconds:
+                        type: integer
+                      process:
+                        type: object
+                      postgres:
+                        type: object
+                      postgres_pool:
+                        type: object
+                  request_id:
+                    type: string
+                  correlation_id:
+                    type: string
+  /api/v1/tools/{id}/comments:
+    get:
+      summary: List partner comments for a tool
+      tags: [Tools]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Comments list
+    post:
+      summary: Create partner comment for a tool
+      tags: [Tools]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [body]
+              properties:
+                body:
+                  type: string
+      responses:
+        "200":
+          description: Comment created
+  /api/v1/tools/{id}/comments/{commentId}:
+    delete:
+      summary: Delete partner comment
+      tags: [Tools]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: commentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Comment deleted
+components:
+  schemas:
+    Role:
+      type: string
+      enum: [user, admin, super_admin]
+    Member:
+      type: object
+      properties:
+        user_id:
+          type: string
+        email:
+          type: string
+        role:
+          $ref: "#/components/schemas/Role"
+        tenant_id:
+          type: string
+        memberships:
+          type: array
+          items:
+            type: string
