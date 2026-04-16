@@ -1,0 +1,178 @@
+{
+  "name": "AI Tool Radar - n8n Ingest Workflow",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "manual-trigger",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "batch-id",
+              "name": "batch_id",
+              "value": "={{'n8n-' + $now.toFormat('yyyyLLdd-HHmmss')}}",
+              "type": "string"
+            },
+            {
+              "id": "source",
+              "name": "source",
+              "value": "n8n.tools.feed",
+              "type": "string"
+            },
+            {
+              "id": "version",
+              "name": "version",
+              "value": "1.0",
+              "type": "string"
+            },
+            {
+              "id": "generated-at",
+              "name": "generated_at",
+              "value": "={{$now.toISO()}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-envelope",
+      "name": "Set Envelope",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        460,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const payload = {\n  source: $json.source,\n  version: $json.version,\n  generated_at: $json.generated_at,\n  batch_id: $json.batch_id,\n  data: [\n    {\n      id: 'openai-gpt-4o',\n      title: 'OpenAI GPT-4o',\n      summary: 'Multimodal foundation model for text, image, and voice workflows.',\n      url: 'https://openai.com',\n      source: 'openai',\n      category: 'foundation-model',\n      recommended_action: 'track',\n      published_date: '2026-04-10T00:00:00.000Z',\n      final_score: 9.2,\n      lifecycle_status: 'hot',\n      value_stream: ['customer-support', 'internal-productivity'],\n      work_phase: ['ideation', 'delivery', 'operations'],\n      tool_type: ['foundation'],\n      service_model: ['cloud'],\n      pricing_model: ['subscription', 'usage-based'],\n      integrability: ['api'],\n      compliance: ['soc2'],\n      validation_level: ['production-used'],\n      target_use: ['general-assistant', 'workflow-automation'],\n      explainability: ['medium'],\n      language: ['english', 'multilingual'],\n      tool_maturity: ['mature'],\n      vendor_maturity: ['established'],\n      discontinued: false,\n      metadata: {\n        vendor: 'OpenAI',\n        tags: ['llm', 'multimodal', 'enterprise'],\n        last_seen_at: $json.generated_at,\n        collector: 'n8n'\n      }\n    }\n  ]\n};\n\nconst rawBody = JSON.stringify(payload);\nconst timestamp = Math.floor(Date.now() / 1000).toString();\n\nreturn [{\n  json: {\n    payload,\n    rawBody,\n    timestamp\n  }\n}];"
+      },
+      "id": "build-payload",
+      "name": "Build Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        700,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const crypto = require('crypto');\nconst secret = $env.RADAR_INGEST_SECRET || 'replace-me';\nconst rawBody = $json.rawBody;\nconst signature = crypto.createHmac('sha256', secret).update(rawBody).digest('hex');\nreturn [{\n  json: {\n    payload: $json.payload,\n    rawBody,\n    timestamp: $json.timestamp,\n    signature\n  }\n}];"
+      },
+      "id": "sign-request",
+      "name": "Sign Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        940,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://YOUR-APP-DOMAIN/api/v1/ingest/tools",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Ingest-Timestamp",
+              "value": "={{$json.timestamp}}"
+            },
+            {
+              "name": "X-Ingest-Signature",
+              "value": "={{'sha256=' + $json.signature}}"
+            },
+            {
+              "name": "X-Correlation-Id",
+              "value": "={{$json.payload.batch_id}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{$json.payload}}",
+        "options": {}
+      },
+      "id": "post-ingest",
+      "name": "Post Ingest",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1180,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Set Envelope",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Envelope": {
+      "main": [
+        [
+          {
+            "node": "Build Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Payload": {
+      "main": [
+        [
+          {
+            "node": "Sign Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sign Request": {
+      "main": [
+        [
+          {
+            "node": "Post Ingest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "n8n-ingest-template-v1",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "id": "ai-tool-radar-n8n-ingest-template",
+  "tags": []
+}

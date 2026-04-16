@@ -106,6 +106,16 @@ Deploy on Vercel and add the same environment variable there:
 - Added CI/e2e seed helper: `npm run db:seed:e2e`
 - Added outbound alert webhook support via `RADAR_ALERT_WEBHOOK_URL`
 
+## n8n ingest integration
+
+- Recommended production ingest endpoint: `POST /api/v1/ingest/tools`
+- Required headers:
+  - `X-Ingest-Timestamp`
+  - `X-Ingest-Signature: sha256=<hmac hex>`
+  - optional `X-Correlation-Id`
+- Signing secret is configured via `RADAR_INGEST_SECRET`
+- Sample payload: `docs/n8n-ingest-example.json`
+
 ## Admin overview (optional auth)
 
 When `RADAR_REQUIRE_AUTH=true`, admins can open `/admin` for KPIs backed by `GET /api/v1/admin/stats` (audit + triage aggregates).

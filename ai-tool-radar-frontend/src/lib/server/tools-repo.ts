@@ -122,7 +122,7 @@ function enrichRowLifecycle(row: ToolRow): ToolRow {
   };
 }
 
-async function upsertTools(rows: ToolRow[]): Promise<void> {
+export async function upsertTools(rows: ToolRow[]): Promise<void> {
   await ensureToolsSchema();
   for (const row of rows) {
     const enriched = enrichRowLifecycle(row);

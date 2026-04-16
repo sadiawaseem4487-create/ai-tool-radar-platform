@@ -273,6 +273,51 @@ paths:
                     type: string
                   correlation_id:
                     type: string
+  /api/v1/ingest/tools:
+    post:
+      summary: Signed ingest endpoint for n8n or external feeders
+      tags: [Ingest]
+      parameters:
+        - name: X-Ingest-Timestamp
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: X-Ingest-Signature
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: X-Correlation-Id
+          in: header
+          required: false
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [source, batch_id, data]
+              properties:
+                source:
+                  type: string
+                version:
+                  type: string
+                generated_at:
+                  type: string
+                batch_id:
+                  type: string
+                data:
+                  type: array
+                  items:
+                    type: object
+      responses:
+        "200":
+          description: Ingest accepted
+        "401":
+          description: Invalid signature or timestamp
   /api/v1/tools/{id}/comments:
     get:
       summary: List partner comments for a tool

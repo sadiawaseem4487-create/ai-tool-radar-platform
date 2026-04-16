@@ -1,0 +1,40 @@
+{
+  "source": "n8n.tools.feed",
+  "version": "1.0",
+  "generated_at": "2026-04-16T10:30:00.000Z",
+  "batch_id": "n8n-20260416-103000",
+  "data": [
+    {
+      "id": "openai-gpt-4o",
+      "title": "OpenAI GPT-4o",
+      "summary": "Multimodal foundation model for text, image, and voice workflows.",
+      "url": "https://openai.com",
+      "source": "openai",
+      "category": "foundation-model",
+      "recommended_action": "track",
+      "published_date": "2026-04-10T00:00:00.000Z",
+      "final_score": 9.2,
+      "lifecycle_status": "hot",
+      "value_stream": ["customer-support", "internal-productivity"],
+      "work_phase": ["ideation", "delivery", "operations"],
+      "tool_type": ["foundation"],
+      "service_model": ["cloud"],
+      "pricing_model": ["subscription", "usage-based"],
+      "integrability": ["api"],
+      "compliance": ["soc2"],
+      "validation_level": ["production-used"],
+      "target_use": ["general-assistant", "workflow-automation"],
+      "explainability": ["medium"],
+      "language": ["english", "multilingual"],
+      "tool_maturity": ["mature"],
+      "vendor_maturity": ["established"],
+      "discontinued": false,
+      "metadata": {
+        "vendor": "OpenAI",
+        "tags": ["llm", "multimodal", "enterprise"],
+        "last_seen_at": "2026-04-16T10:00:00.000Z",
+        "collector": "n8n"
+      }
+    }
+  ]
+}

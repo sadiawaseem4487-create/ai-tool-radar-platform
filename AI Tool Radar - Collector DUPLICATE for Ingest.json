@@ -1,0 +1,585 @@
+{
+  "name": "AI Tool Radar - Collector DUPLICATE for Ingest",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8,
+              "triggerAtMinute": 0
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [48, -672],
+      "id": "9e972738-c934-4373-9147-054b82568286",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://hnrss.org/newest?q=AI",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [320, -624],
+      "id": "65376fae-6617-49ed-8643-3ba1a2c78b9a",
+      "name": "RSS Read"
+    },
+    {
+      "parameters": {
+        "maxItems": 6
+      },
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [464, -640],
+      "id": "8b64f51c-61c9-4601-a677-0045554891f4",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "278be125-de39-4b07-ac7a-6057641fb3d2",
+              "name": "title",
+              "value": "={{$json.title}}",
+              "type": "string"
+            },
+            {
+              "id": "9fa4ac30-0bb5-4198-9336-f843f8a3bafd",
+              "name": "source",
+              "value": "HackerNews",
+              "type": "string"
+            },
+            {
+              "id": "cf69e1f4-650e-4078-9588-0d1988046574",
+              "name": "summary",
+              "value": "={{$json.title}}",
+              "type": "string"
+            },
+            {
+              "id": "000ac820-99e5-4be1-94e8-280969ce9bbf",
+              "name": "url",
+              "value": "={{$json.link}}",
+              "type": "string"
+            },
+            {
+              "id": "e3b93ecc-e4b0-443e-a9f8-ed4600beb69d",
+              "name": "published_date",
+              "value": "={{$json.pubDate}}",
+              "type": "string"
+            },
+            {
+              "id": "1254c9a9-8654-4f08-b3d0-8331c7154e2d",
+              "name": "created_at",
+              "value": "={{$now}}",
+              "type": "string"
+            },
+            {
+              "id": "7d43b0ec-098d-493c-b0c2-9ac540b5f6ea",
+              "name": "status",
+              "value": "New",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [624, -640],
+      "id": "ccfafcd5-3e5c-4bd0-b22b-ea5011e5ed6a",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.producthunt.com/v2/api/graphql",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer REPLACE_WITH_PRODUCTHUNT_TOKEN"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"query\": \"query { posts(first: 5) { edges { node { name tagline description url createdAt votesCount topics { edges { node { name } } } } } } }\"\n}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [400, -496],
+      "id": "58860467-58f2-4bbc-bfe9-3a83a449c4b7",
+      "name": "Product hunt",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const edges = $json?.data?.posts?.edges || [];\n\nreturn edges.map(edge => {\n  const node = edge?.node || {};\n\n  return {\n    json: {\n      title: node.name || \"\",\n      source: \"ProductHunt\",\n      summary: node.tagline || node.description || \"\",\n      url: node.url || \"\",\n      published_date: node.createdAt || \"\",\n      created_at: new Date().toISOString(),\n      status: \"New\"\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [608, -496],
+      "id": "146e6cd6-2540-4ad4-b98e-71a2347e5706",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "url": "https://api.github.com/search/repositories?q=artificial+intelligence&sort=stars&order=desc&per_page=5",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/vnd.github+json"
+            },
+            {
+              "name": "User-Agent",
+              "value": "AI-Tool-Radar/1.0 (mailto:sadia.waseem4487@gmail.com; n8n collector)"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [416, -800],
+      "id": "7648904e-e914-4dda-873d-4dbf30a64ec4",
+      "name": "GitHub Trending",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const repos = $json.items || [];\n\nreturn repos.map(repo => {\n  return {\n    json: {\n      title: repo.name,\n      source: \"GitHub\",\n      summary: repo.description || \"\",\n      url: repo.html_url,\n      published_date: repo.created_at,\n      created_at: new Date().toISOString(),\n      status: \"New\"\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [624, -800],
+      "id": "10df24a3-f92a-4623-a350-b6eeeff8f1f7",
+      "name": "Transform GitHub data"
+    },
+    {
+      "parameters": {
+        "resume": "timeInterval",
+        "amount": 12,
+        "unit": "seconds"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [160, -336],
+      "id": "b2e9c4a1-7d8f-4a2e-9b0c-waitbeforearxiv",
+      "name": "Wait before arXiv"
+    },
+    {
+      "parameters": {
+        "url": "https://export.arxiv.org/api/query?search_query=all:artificial+intelligence&start=0&max_results=5",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "AI-Tool-Radar/1.0 (mailto:sadia.waseem4487@gmail.com; collector n8n workflow)"
+            },
+            {
+              "name": "Accept",
+              "value": "application/atom+xml"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [320, -336],
+      "id": "88cc03e3-7979-4254-91b0-77bb5703c8ae",
+      "name": "HTTP Request",
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 20000,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.xml",
+      "typeVersion": 1,
+      "position": [528, -336],
+      "id": "b90f3bc9-3bdd-47b3-9d4f-4a052e74eb77",
+      "name": "XML"
+    },
+    {
+      "parameters": {
+        "jsCode": "const feed = $json.feed || $json;\nlet entries = feed.entry || [];\n\nif (!Array.isArray(entries)) {\n  entries = [entries];\n}\n\nreturn entries.map(entry => {\n  const title = entry.title?._text || entry.title || \"\";\n  const summary = entry.summary?._text || entry.summary || \"\";\n  const published = entry.published?._text || entry.published || \"\";\n  const url = entry.id?._text || entry.id || \"\";\n\n  return {\n    json: {\n      title: String(title).replace(/\\s+/g, \" \").trim(),\n      source: \"arXiv\",\n      summary: String(summary).replace(/\\s+/g, \" \").trim().slice(0, 500),\n      url: String(url),\n      published_date: String(published),\n      created_at: new Date().toISOString(),\n      status: \"New\"\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [704, -336],
+      "id": "9cd36784-d4ed-45e6-815a-635f377980dd",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "mode": "append",
+        "numberInputs": 4
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [1072, -640],
+      "id": "93a9096a-5157-4a28-8ace-bbfee1be02a9",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nconst keywords = [\n  \"ai\", \"artificial intelligence\", \"llm\", \"gpt\",\n  \"agent\", \"agents\", \"rag\", \"multimodal\",\n  \"model\", \"models\", \"machine learning\", \"ml\",\n  \"genai\", \"generative\", \"embedding\",\n  \"fine-tuning\", \"inference\", \"vision\", \"voice\"\n];\n\nfunction scoreItem(item) {\n  const title = (item.json.title || \"\").toLowerCase();\n  const summary = (item.json.summary || \"\").toLowerCase();\n  const text = `${title} ${summary}`;\n\n  let score = 0;\n  for (const k of keywords) {\n    if (text.includes(k)) score += 2;\n  }\n\n  const source = item.json.source || \"\";\n  if (source === \"ProductHunt\") score += 3;\n  if (source === \"GitHub\") score += 2;\n  if (source === \"arXiv\") score += 2;\n  if (source === \"HackerNews\") score += 1;\n\n  return score;\n}\n\nconst seen = new Set();\nconst deduped = items.filter(item => {\n  const url = item.json.url || \"\";\n  if (!url) return true;\n  if (seen.has(url)) return false;\n  seen.add(url);\n  return true;\n});\n\nconst relevant = deduped.filter(item => {\n  const title = (item.json.title || \"\").toLowerCase();\n  const summary = (item.json.summary || \"\").toLowerCase();\n  const text = `${title} ${summary}`;\n  return keywords.some(k => text.includes(k));\n});\n\nconst groups = {\n  ProductHunt: [],\n  GitHub: [],\n  arXiv: [],\n  HackerNews: []\n};\n\nfor (const item of relevant) {\n  const source = item.json.source || \"\";\n  if (groups[source]) {\n    groups[source].push({ item, score: scoreItem(item) });\n  }\n}\n\nfor (const source of Object.keys(groups)) {\n  groups[source].sort((a, b) => b.score - a.score);\n}\n\nconst limits = {\n  ProductHunt: 3,\n  GitHub: 2,\n  arXiv: 2,\n  HackerNews: 1\n};\n\nlet selected = [];\n\nfor (const source of Object.keys(limits)) {\n  selected.push(...groups[source].slice(0, limits[source]).map(x => x.item));\n}\n\nif (selected.length < 8) {\n  const selectedUrls = new Set(selected.map(x => x.json.url || \"\"));\n  const leftovers = [];\n\n  for (const source of Object.keys(groups)) {\n    for (const x of groups[source]) {\n      const url = x.item.json.url || \"\";\n      if (!selectedUrls.has(url)) leftovers.push(x);\n    }\n  }\n\n  leftovers.sort((a, b) => b.score - a.score);\n\n  for (const x of leftovers) {\n    if (selected.length >= 8) break;\n    selected.push(x.item);\n  }\n}\n\nreturn selected;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1248, -608],
+      "id": "a420f7ac-77af-4545-836d-66fd46214ec3",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer REPLACE_WITH_OPENROUTER_API_KEY"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "HTTP-Referer",
+              "value": "https://n8n.io"
+            },
+            {
+              "name": "X-Title",
+              "value": "AI Tool Radar"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"openai/gpt-4o-mini\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You evaluate whether a newly discovered AI tool, repository, paper, or update is worth trying or tracking in a generative AI lab.\\n\\nReturn only strict JSON with these keys:\\ncategory, lab_relevance, practicality, novelty, recommended_action, why_it_matters.\\n\\nRules:\\n- lab_relevance, practicality, novelty must be integers from 1 to 10\\n- recommended_action must be one of: Test, Watch, Ignore\\n- why_it_matters must be one short sentence\\n\\nIMPORTANT:\\nAlways choose a category from this list only:\\nLLM, Agents, RAG, Evaluation, Multimodal, Coding, Productivity, Research Tools, Automation\\n\\nInterpretation guide:\\n- For papers, practicality may be lower but novelty can be high\\n- For repositories, practicality may be high if implementation looks useful\\n- For products/tools, prioritize usefulness for lab workflows\\n- Ignore items that are not meaningfully related to AI work in a generative AI lab\\n\\nCRITICAL OUTPUT RULES:\\n- Return raw JSON only\\n- Do NOT use markdown\\n- Do NOT wrap in code fences\\n- Do NOT prefix with the word json\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Title: {{$json.title}}\\nSource: {{$json.source}}\\nSummary: {{$json.summary}}\\nURL: {{$json.url}}\"\n    }\n  ]\n}",
+        "options": {
+          "timeout": 45000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [1424, -608],
+      "id": "78c5200a-83ea-4b53-b278-f4e939cb66b6",
+      "name": "Open AI",
+      "retryOnFail": true,
+      "maxTries": 4,
+      "waitBetweenTries": 5000,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "function safeText(value, fallback = '') {\n  const text = String(value ?? '').trim();\n  return text || fallback;\n}\n\nfunction clampScore(value) {\n  const n = Number(value);\n  if (!Number.isFinite(n)) return 0;\n  return Math.max(1, Math.min(10, Math.round(n)));\n}\n\nfunction hashText(text) {\n  let hash = 5381;\n  for (let i = 0; i < text.length; i++) {\n    hash = ((hash << 5) + hash) + text.charCodeAt(i);\n    hash = hash >>> 0;\n  }\n  return `h_${hash.toString(16)}`;\n}\n\nconst aiRaw = (($json.choices?.[0]?.message?.content) || '{\"category\":\"unknown\",\"lab_relevance\":0,\"practicality\":0,\"novelty\":0,\"recommended_action\":\"Watch\",\"why_it_matters\":\"Model response missing\"}')\n  .replace(/```json/g, '')\n  .replace(/```/g, '')\n  .replace(/^json\\s*/i, '')\n  .replace(/\\n/g, ' ')\n  .replace(/\\\\\"/g, '\"')\n  .trim();\n\nlet parsed;\ntry {\n  parsed = JSON.parse(aiRaw || '{}');\n} catch (e) {\n  parsed = {\n    category: 'unknown',\n    lab_relevance: 0,\n    practicality: 0,\n    novelty: 0,\n    recommended_action: 'Watch',\n    why_it_matters: 'Parsing failed'\n  };\n}\n\nconst original = $('Code in JavaScript2').item.json;\nconst lab = clampScore(parsed.lab_relevance);\nconst prac = clampScore(parsed.practicality);\nconst nov = clampScore(parsed.novelty);\nconst final_score = Number(((lab + prac + nov) / 3).toFixed(2));\nconst title = safeText(original.title, 'untitled');\nconst url = safeText(original.url, '');\nconst hash_id = hashText(`${title.toLowerCase()}|${url.toLowerCase()}`);\nconst batch_id = 'n8n-' + DateTime.now().toFormat('yyyyLLdd-HHmmss') + '-' + hash_id;\n\nconst tool = {\n  id: hash_id,\n  hash_id,\n  title,\n  source: safeText(original.source),\n  summary: safeText(original.summary),\n  url,\n  published_date: safeText(original.published_date),\n  created_at: safeText(original.created_at, new Date().toISOString()),\n  status: safeText(original.status, 'New'),\n  category: safeText(parsed.category, 'unknown'),\n  lab_relevance: lab,\n  practicality: prac,\n  novelty: nov,\n  final_score,\n  recommended_action: safeText(parsed.recommended_action, 'Watch'),\n  why_it_matters: safeText(parsed.why_it_matters, 'Pending').slice(0, 220)\n};\n\nconst payload = {\n  source: 'n8n.tools.feed',\n  version: '1.0',\n  generated_at: new Date().toISOString(),\n  batch_id,\n  data: [tool]\n};\n\nconst rawBody = JSON.stringify(payload);\nconst timestamp = Math.floor(Date.now() / 1000).toString();\n\nreturn [{ json: { payload, rawBody, timestamp } }];"
+      },
+      "id": "build-payload",
+      "name": "Build Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1664, -608]
+    },
+    {
+      "parameters": {
+        "jsCode": "const crypto = require('crypto');\nconst secret = $env.RADAR_INGEST_SECRET || 'replace-me';\nconst rawBody = $json.rawBody;\nconst signature = crypto.createHmac('sha256', secret).update(rawBody).digest('hex');\nreturn [{ json: { payload: $json.payload, timestamp: $json.timestamp, signature } }];"
+      },
+      "id": "sign-request",
+      "name": "Sign Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1904, -608]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://YOUR-APP-DOMAIN/api/v1/ingest/tools",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Ingest-Timestamp",
+              "value": "={{$json.timestamp}}"
+            },
+            {
+              "name": "X-Ingest-Signature",
+              "value": "={{'sha256=' + $json.signature}}"
+            },
+            {
+              "name": "X-Correlation-Id",
+              "value": "={{$json.payload.batch_id}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{$json.payload}}",
+        "options": {}
+      },
+      "id": "post-ingest",
+      "name": "Post Ingest",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2144, -608]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "RSS Read",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Product hunt",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "GitHub Trending",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Wait before arXiv",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Product hunt": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "GitHub Trending": {
+      "main": [
+        [
+          {
+            "node": "Transform GitHub data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transform GitHub data": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait before arXiv": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "XML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "XML": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "Open AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Open AI": {
+      "main": [
+        [
+          {
+            "node": "Build Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Payload": {
+      "main": [
+        [
+          {
+            "node": "Sign Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sign Request": {
+      "main": [
+        [
+          {
+            "node": "Post Ingest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "collector-duplicate-ingest-v1",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "id": "AI-Tool-Radar-Collector-DUPLICATE-for-Ingest",
+  "tags": [
+    {
+      "name": "duplicate"
+    }
+  ]
+}
