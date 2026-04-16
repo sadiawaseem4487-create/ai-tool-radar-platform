@@ -43,6 +43,14 @@ function normalizeRows(data: unknown): IngestTool[] {
   return out;
 }
 
+function unwrapEnvelope(body: Record<string, unknown>): Record<string, unknown> {
+  const wrapped = body.body;
+  if (wrapped && typeof wrapped === "object" && !Array.isArray(wrapped)) {
+    return wrapped as Record<string, unknown>;
+  }
+  return body;
+}
+
 export async function POST(req: NextRequest) {
   const rid = requestId();
   const correlationId = req.headers.get("x-correlation-id")?.trim() || rid;
@@ -59,7 +67,8 @@ export async function POST(req: NextRequest) {
       return jsonError(401, "INVALID_INGEST_SIGNATURE", "Ingest signature verification failed.", rid, correlationId);
     }
 
-    const body = rawBody.trim() ? (JSON.parse(rawBody) as Record<string, unknown>) : {};
+    const parsedBody = rawBody.trim() ? (JSON.parse(rawBody) as Record<string, unknown>) : {};
+    const body = unwrapEnvelope(parsedBody);
     const source = asTrimmed(body.source, 120) || "n8n.tools.feed";
     const batchId = asTrimmed(body.batch_id, 160);
     if (!batchId) {

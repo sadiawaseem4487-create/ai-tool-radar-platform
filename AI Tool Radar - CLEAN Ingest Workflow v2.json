@@ -1,0 +1,552 @@
+{
+  "name": "AI Tool Radar - CLEAN Ingest Workflow v2",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "manual-trigger",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [80, 300]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 30
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [80, 120]
+    },
+    {
+      "parameters": {
+        "url": "https://hnrss.org/newest?q=AI",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "AI-Tool-Radar/1.0"
+            },
+            {
+              "name": "Accept",
+              "value": "application/rss+xml, application/xml, text/xml"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "hn-http",
+      "name": "Hacker News Feed",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [320, -120]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "hn-xml",
+      "name": "Parse HN XML",
+      "type": "n8n-nodes-base.xml",
+      "typeVersion": 1,
+      "position": [560, -120]
+    },
+    {
+      "parameters": {
+        "jsCode": "const root = $json.rss || $json;\nconst channel = root.channel || {};\nlet items = channel.item || [];\nif (!Array.isArray(items)) items = [items];\nreturn items.slice(0, 6).map((item) => ({ json: { title: String(item.title?._text || item.title || '').trim(), source: 'HackerNews', summary: String(item.title?._text || item.title || '').trim(), url: String(item.link?._text || item.link || ''), published_date: String(item.pubDate?._text || item.pubDate || ''), created_at: new Date().toISOString(), status: 'New' } }));"
+      },
+      "id": "transform-hn",
+      "name": "Transform Hacker News",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [800, -120]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.producthunt.com/v2/api/graphql",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer REPLACE_WITH_PRODUCTHUNT_TOKEN"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"query\": \"query { posts(first: 5) { edges { node { name tagline description url createdAt } } } }\"\n}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "product-hunt",
+      "name": "Product Hunt",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [320, 60]
+    },
+    {
+      "parameters": {
+        "jsCode": "const edges = $json?.data?.posts?.edges || [];\nreturn edges.map((edge) => ({ json: { title: edge?.node?.name || '', source: 'ProductHunt', summary: edge?.node?.tagline || edge?.node?.description || '', url: edge?.node?.url || '', published_date: edge?.node?.createdAt || '', created_at: new Date().toISOString(), status: 'New' } }));"
+      },
+      "id": "transform-ph",
+      "name": "Transform Product Hunt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [560, 60]
+    },
+    {
+      "parameters": {
+        "url": "https://api.github.com/search/repositories?q=artificial+intelligence&sort=stars&order=desc&per_page=5",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/vnd.github+json"
+            },
+            {
+              "name": "User-Agent",
+              "value": "AI-Tool-Radar/1.0"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "github",
+      "name": "GitHub Trending",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [320, 240]
+    },
+    {
+      "parameters": {
+        "jsCode": "const repos = $json.items || [];\nreturn repos.map((repo) => ({ json: { title: repo.name || '', source: 'GitHub', summary: repo.description || '', url: repo.html_url || '', published_date: repo.created_at || '', created_at: new Date().toISOString(), status: 'New' } }));"
+      },
+      "id": "transform-gh",
+      "name": "Transform GitHub",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [560, 240]
+    },
+    {
+      "parameters": {
+        "url": "https://export.arxiv.org/api/query?search_query=all:artificial+intelligence&start=0&max_results=5",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "AI-Tool-Radar/1.0"
+            },
+            {
+              "name": "Accept",
+              "value": "application/atom+xml"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "arxiv-feed",
+      "name": "arXiv Feed",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [320, 420]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "parse-arxiv",
+      "name": "Parse arXiv XML",
+      "type": "n8n-nodes-base.xml",
+      "typeVersion": 1,
+      "position": [560, 420]
+    },
+    {
+      "parameters": {
+        "jsCode": "const feed = $json.feed || $json;\nlet entries = feed.entry || [];\nif (!Array.isArray(entries)) entries = [entries];\nreturn entries.map((entry) => ({ json: { title: String(entry.title?._text || entry.title || '').replace(/\\s+/g, ' ').trim(), source: 'arXiv', summary: String(entry.summary?._text || entry.summary || '').replace(/\\s+/g, ' ').trim().slice(0, 500), url: String(entry.id?._text || entry.id || ''), published_date: String(entry.published?._text || entry.published || ''), created_at: new Date().toISOString(), status: 'New' } }));"
+      },
+      "id": "transform-arxiv",
+      "name": "Transform arXiv",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [800, 420]
+    },
+    {
+      "parameters": {
+        "mode": "append",
+        "numberInputs": 4
+      },
+      "id": "merge-sources",
+      "name": "Merge Sources",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [1040, 180]
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst keywords = ['ai', 'artificial intelligence', 'llm', 'gpt', 'agent', 'rag', 'multimodal', 'machine learning'];\nconst seen = new Set();\nconst out = [];\nfor (const item of items) {\n  const key = String(item.json.url || item.json.title || '');\n  if (!key || seen.has(key)) continue;\n  seen.add(key);\n  const text = `${String(item.json.title || '').toLowerCase()} ${String(item.json.summary || '').toLowerCase()}`;\n  if (!keywords.some((k) => text.includes(k))) continue;\n  out.push(item);\n}\nreturn out.slice(0, 10);"
+      },
+      "id": "filter-rank",
+      "name": "Filter and Rank",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1280, 180]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer REPLACE_WITH_OPENROUTER_API_KEY"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"openai/gpt-4o-mini\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"Return only strict JSON with keys: category, lab_relevance, practicality, novelty, recommended_action, why_it_matters. Scores must be integers 1-10. recommended_action must be Test, Watch, or Ignore.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Title: {{$json.title}}\\nSource: {{$json.source}}\\nSummary: {{$json.summary}}\\nURL: {{$json.url}}\"\n    }\n  ]\n}",
+        "options": {
+          "timeout": 45000
+        }
+      },
+      "id": "open-ai",
+      "name": "Open AI",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [1520, 180]
+    },
+    {
+      "parameters": {
+        "jsCode": "function safeText(value, fallback = '') { const text = String(value ?? '').trim(); return text || fallback; }\nfunction clamp(value) { const n = Number(value); if (!Number.isFinite(n)) return 0; return Math.max(1, Math.min(10, Math.round(n))); }\nfunction hashText(text) { let hash = 5381; for (let i = 0; i < text.length; i++) { hash = ((hash << 5) + hash) + text.charCodeAt(i); hash = hash >>> 0; } return `h_${hash.toString(16)}`; }\nconst aiRaw = (($json.choices?.[0]?.message?.content) || '{\"category\":\"unknown\",\"lab_relevance\":0,\"practicality\":0,\"novelty\":0,\"recommended_action\":\"Watch\",\"why_it_matters\":\"Model response missing\"}').replace(/```json/g, '').replace(/```/g, '').replace(/^json\\s*/i, '').trim();\nlet parsed; try { parsed = JSON.parse(aiRaw); } catch { parsed = { category: 'unknown', lab_relevance: 0, practicality: 0, novelty: 0, recommended_action: 'Watch', why_it_matters: 'Parsing failed' }; }\nconst original = $('Filter and Rank').item.json;\nconst lab = clamp(parsed.lab_relevance); const prac = clamp(parsed.practicality); const nov = clamp(parsed.novelty);\nconst final_score = Number(((lab + prac + nov) / 3).toFixed(2));\nconst title = safeText(original.title, 'untitled');\nconst url = safeText(original.url, '');\nconst hash_id = hashText(`${title.toLowerCase()}|${url.toLowerCase()}`);\nconst payload = { source: 'n8n.tools.feed', version: '1.0', generated_at: new Date().toISOString(), batch_id: `n8n-${new Date().toISOString().replace(/[:.]/g, '').replace('T', '-').slice(0, 15)}-${hash_id}`, data: [{ id: hash_id, hash_id, title, source: safeText(original.source), summary: safeText(original.summary), url, published_date: safeText(original.published_date), created_at: safeText(original.created_at, new Date().toISOString()), status: safeText(original.status, 'New'), category: safeText(parsed.category, 'unknown'), lab_relevance: lab, practicality: prac, novelty: nov, final_score, recommended_action: safeText(parsed.recommended_action, 'Watch'), why_it_matters: safeText(parsed.why_it_matters, 'Pending').slice(0, 220) }] };\nreturn [{ json: { payload, timestamp: Math.floor(Date.now() / 1000).toString() } }];"
+      },
+      "id": "build-payload",
+      "name": "Build Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1760, 180]
+    },
+    {
+      "parameters": {
+        "operation": "hmac",
+        "type": "SHA256",
+        "value": "={{JSON.stringify($json.payload)}}"
+      },
+      "id": "crypto",
+      "name": "Crypto",
+      "type": "n8n-nodes-base.crypto",
+      "typeVersion": 1,
+      "position": [2000, 180],
+      "credentials": {
+        "crypto": {
+          "id": "REPLACE_WITH_CRYPTO_CREDENTIAL_ID",
+          "name": "Crypto account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://ai-tool-radar-platform-td2l.vercel.app/api/v1/ingest/tools",
+        "authentication": "none",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Ingest-Timestamp",
+              "value": "={{$json.timestamp}}"
+            },
+            {
+              "name": "X-Ingest-Signature",
+              "value": "={{'sha256=' + $json.data}}"
+            },
+            {
+              "name": "X-Correlation-Id",
+              "value": "={{$json.payload.batch_id}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{JSON.stringify($json.payload)}}",
+        "options": {}
+      },
+      "id": "post-ingest",
+      "name": "Post Ingest",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2240, 180]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Hacker News Feed",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Product Hunt",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "GitHub Trending",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "arXiv Feed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Hacker News Feed",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Product Hunt",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "GitHub Trending",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "arXiv Feed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hacker News Feed": {
+      "main": [
+        [
+          {
+            "node": "Parse HN XML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse HN XML": {
+      "main": [
+        [
+          {
+            "node": "Transform Hacker News",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transform Hacker News": {
+      "main": [
+        [
+          {
+            "node": "Merge Sources",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Product Hunt": {
+      "main": [
+        [
+          {
+            "node": "Transform Product Hunt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transform Product Hunt": {
+      "main": [
+        [
+          {
+            "node": "Merge Sources",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "GitHub Trending": {
+      "main": [
+        [
+          {
+            "node": "Transform GitHub",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transform GitHub": {
+      "main": [
+        [
+          {
+            "node": "Merge Sources",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "arXiv Feed": {
+      "main": [
+        [
+          {
+            "node": "Parse arXiv XML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse arXiv XML": {
+      "main": [
+        [
+          {
+            "node": "Transform arXiv",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transform arXiv": {
+      "main": [
+        [
+          {
+            "node": "Merge Sources",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Merge Sources": {
+      "main": [
+        [
+          {
+            "node": "Filter and Rank",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter and Rank": {
+      "main": [
+        [
+          {
+            "node": "Open AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Open AI": {
+      "main": [
+        [
+          {
+            "node": "Build Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Payload": {
+      "main": [
+        [
+          {
+            "node": "Crypto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crypto": {
+      "main": [
+        [
+          {
+            "node": "Post Ingest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "clean-ingest-v2",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "id": "ai-tool-radar-clean-ingest-workflow-v2",
+  "tags": [
+    {
+      "name": "clean"
+    },
+    {
+      "name": "hackernews-http"
+    }
+  ]
+}
